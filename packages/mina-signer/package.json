@@ -4,17 +4,32 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc",
-    "bundle": "webpack"
+    "clean": "rm -rf dist/*",
+    "build": "webpack -p --mode production",
+    "build-dev": "webpack -d --mode development"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "mina-signer": "3.0.0"
+    "mina-signer": "3.0.0",
+    "@babel/polyfill": "^7.8.3",
+    "bignumber.js": "^9.0.1",
+    "bip32": "^2.0.6",
+    "bip39": "^3.0.3",
+    "bn.js": "^5.1.1",
+    "bs58check": "^2.1.2",
+    "randombytes": "^2.1.0",
+    "safe-buffer": "^5.2.1",
+    "libsodium-wrappers": "^0.7.9"
   },
   "devDependencies": {
+    "@babel/core": "^7.8.3",
+    "@babel/preset-env": "^7.8.3",
+    "@webpack-cli/info": "^0.2.0",
+    "@webpack-cli/init": "^0.3.0",
+    "babel-loader": "^8.0.6",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.9.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "prettier": "^1.19.1",
     "webpack": "^5.90.2",
     "webpack-cli": "^5.1.4",
     "typescript": "^5.3.3"
