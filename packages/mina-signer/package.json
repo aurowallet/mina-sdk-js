@@ -9,7 +9,7 @@
     "build-dev": "webpack -d --mode development"
   },
   "dependencies": {
-    "@babel/polyfill": "^7.8.3",
+    "@babel/polyfill": "7.12.1",
     "bignumber.js": "^9.0.1",
     "bip32": "^2.0.6",
     "bip39": "^3.0.3",
@@ -33,5 +33,19 @@
     "prettier": "^1.19.1",
     "webpack": "^4.41.5",
     "webpack-cli": "^3.3.10"
+  },
+  "browserslist": {
+    "production": [
+      "chrome >= 67",
+      "edge >= 79",
+      "firefox >= 68",
+      "opera >= 54",
+      "safari >= 14"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }
