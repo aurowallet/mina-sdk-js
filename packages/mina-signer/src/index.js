@@ -1,5 +1,6 @@
 import "@babel/polyfill";
 import account from "./account";
+import utils from "./utils"
 
 // send message to JSChannel: MinaWallet
 function send(path, data) {
@@ -15,3 +16,4 @@ send("log", "main js loaded");
 global.send = send;
 
 global.account = account;
+global.utils = utils

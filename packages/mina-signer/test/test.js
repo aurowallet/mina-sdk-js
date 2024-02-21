@@ -11,7 +11,6 @@ function runAccountTest() {
   expect(!!mne, true);
 
   const testData = window.accountData;
-  console.log("testData", testData[0]);
   for (let index = 0; index < testData.length; index++) {
     const mneData = testData[index];
     console.info(
@@ -49,8 +48,28 @@ function runAccountTest() {
   }
 }
 
+function runUtilsTest() {
+  const testData = window.accountData;
+  for (let index = 0; index < testData.length; index++) {
+    const mneData = testData[index];
+    console.info(`current is ${index}, total is ${testData.length}`);
+    for (let j = 0; j < mneData.account.length; j++) {
+      const innerAccount = mneData.account[j];
+      const status = utils.isAddressValid({
+        address: innerAccount.pubKey,
+      });
+      expect(status, true);
+    }
+  }
+}
+
 async function runTests() {
-  runAccountTest();
+  /** test account  */
+  // runAccountTest();
+
+  /** test utils */
+  runUtilsTest();
+
   console.log("all tests successful.");
 }
 window.runTests = runTests;
