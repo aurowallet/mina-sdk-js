@@ -174,7 +174,7 @@ function runTransactionTest(params) {
   signMessage();
 }
 
-async function runFieldsTest() {
+function runFieldsTest() {
   console.log("runFieldsTest test start");
   const transactionData = window.transactionData.signFiledsData;
   const signResultMainnet = auroSignLib.signFields(
@@ -213,7 +213,22 @@ async function runFieldsTest() {
   console.log("runFieldsTest test successful");
 }
 
-async function runTests() {
+function runNullifierTest() {
+  console.log("runNullifierTest test start");
+  const transactionData = window.transactionData.nullifierData;
+  const signResultMainnet = auroSignLib.createNullifier(
+    transactionData.mainnet.signParams
+  );
+  expect(!!signResultMainnet.private, true, "mainnet runNullifierTest");
+  const signResultTest = auroSignLib.createNullifier(
+    transactionData.testnet.signParams
+  );
+  console.log("signResultTest==", signResultTest);
+  expect(!!signResultTest.private, true, "testnet runNullifierTest");
+  console.log("runNullifierTest test successful");
+}
+
+function runTests() {
   /** test account  */
   // runAccountTest();
 
@@ -224,10 +239,11 @@ async function runTests() {
   // runTransactionTest();
 
   /** test fields */
-  runFieldsTest();
+  // runFieldsTest();
+
+  /** create Nullifier */
+  runNullifierTest();
 
   console.log("all tests successful.");
 }
 window.runTests = runTests;
-
-async function runNullifierTest(params) {}
