@@ -254,6 +254,7 @@ window.transactionData = {
         network: "mainnet",
         type: "message",
         privateKey: "EKEfKdYoaCeGy4aZoCSam6DdGejrL121HSwFGrckzkLcLqPTMUxW",
+        publicKey: "B62qkVs6zgN84e1KjFxurigqTQ57FqV3KnWubV3t77E9R6uBm4DmkPi",
         message:
           '[{"label":"Label:","value":"Sign Confirm"},{"label":"Message:","value":"Click to sign in and accept the Terms of Service"},{"label":"URI:","value":"window.location.href"},{"label":"Chain ID:","value":"mainnet"},{"label":"Chain Name:","value":"Mainnet"},{"label":"Issued At:","value":1708575769813},{"label":"Resources:","value":"https://docs.aurowallet.com/"}]',
       },
@@ -274,7 +275,7 @@ window.transactionData = {
         network: "testnet",
         type: "message",
         privateKey: "EKEfKdYoaCeGy4aZoCSam6DdGejrL121HSwFGrckzkLcLqPTMUxW",
-        fromAddress: "B62qkVs6zgN84e1KjFxurigqTQ57FqV3KnWubV3t77E9R6uBm4DmkPi",
+        publicKey: "B62qkVs6zgN84e1KjFxurigqTQ57FqV3KnWubV3t77E9R6uBm4DmkPi",
         message: "asdasd",
       },
       signResult: {

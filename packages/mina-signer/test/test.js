@@ -114,14 +114,14 @@ function signZkTransaction() {
   const transactionData = window.transactionData.signZkTransaction;
   let params = {
     ...transactionData.testnet.signParams,
-    transaction:transactionData.testnet.signParams.transaction
-  }
+    transaction: transactionData.testnet.signParams.transaction,
+  };
   // B62qjFNwXHfqXjFTRerWBpd9Sfdx3FfX6hQdErqjS694t1Cn2cSc8MK
   const signResultTest = auroSignLib.signTransaction(
     // transactionData.testnet.signParams
     params
   );
-  console.log('signResultTest=0',signResultTest);
+  console.log("signResultTest=0", signResultTest);
   expect(
     JSON.stringify(signResultTest),
     JSON.stringify(transactionData.testnet.signResult),
@@ -136,11 +136,17 @@ function signMessage() {
     transactionData.mainnet.signParams
   );
   expect(
-    JSON.stringify(signResultMainnet), 
+    JSON.stringify(signResultMainnet),
     JSON.stringify(transactionData.mainnet.signResult),
     "mainnet signMessage"
   );
-
+  const verifyResultMain = auroSignLib.verifyMessage({
+    network: "mainnet",
+    publicKey: transactionData.mainnet.signParams.publicKey,
+    signature: transactionData.mainnet.signResult.signature,
+    verifyMessage: transactionData.mainnet.signResult.data,
+  });
+  expect(verifyResultMain, true, "mainnet verifyMessage");
   const signResultTest = auroSignLib.signTransaction(
     transactionData.testnet.signParams
   );
@@ -149,6 +155,14 @@ function signMessage() {
     JSON.stringify(transactionData.testnet.signResult),
     "testnet signMessage"
   );
+
+  const verifyResultTest = auroSignLib.verifyMessage({
+    network: "testnet",
+    publicKey: transactionData.testnet.signParams.publicKey,
+    signature: transactionData.testnet.signResult.signature,
+    verifyMessage: transactionData.testnet.signResult.data,
+  });
+  expect(verifyResultTest, true, "testnet verifyMessage");
   console.log("signMessage test successful");
 }
 
@@ -157,8 +171,9 @@ function runTransactionTest(params) {
   // signPayment();
   // signStakeTransaction();
   // signZkTransaction()
-  signMessage()
+  signMessage();
   // runVerifyTest
+
 }
 
 async function runTests() {
