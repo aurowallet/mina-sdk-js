@@ -1,6 +1,6 @@
-function expect(actual, matcher) {
+function expect(actual, matcher, title = "") {
   if (actual !== matcher) {
-    throw new Error(`expect ${matcher}, got ${actual}`);
+    throw new Error(`${title} error, expect ${matcher}, got ${actual}`);
   }
 }
 
@@ -63,12 +63,92 @@ function runUtilsTest() {
   }
 }
 
+/**
+ * test signPayment
+ */
+function signPayment() {
+  console.log("signPayment test start");
+  const transactionData = window.transactionData.signPayment;
+  const signResultMainnet = auroSignLib.signTransaction(
+    transactionData.mainnet.signParams
+  );
+  expect(
+    JSON.stringify(signResultMainnet),
+    JSON.stringify(transactionData.mainnet.signResult),
+    "mainnet sendPayment"
+  );
+  const signResultTest = auroSignLib.signTransaction(
+    transactionData.testnet.signParams
+  );
+  expect(
+    JSON.stringify(signResultTest),
+    JSON.stringify(transactionData.testnet.signResult),
+    "testnet sendPayment"
+  );
+  console.log("signPayment test successful");
+}
+function signStakeTransaction() {
+  console.log("signStakeTransaction test start");
+  const transactionData = window.transactionData.signStakeTransaction;
+  const signResultMainnet = auroSignLib.signTransaction(
+    transactionData.mainnet.signParams
+  );
+  expect(
+    JSON.stringify(signResultMainnet),
+    JSON.stringify(transactionData.mainnet.signResult),
+    "mainnet signStakeTransaction"
+  );
+
+  const signResultTest = auroSignLib.signTransaction(
+    transactionData.testnet.signParams
+  );
+  expect(
+    JSON.stringify(signResultTest),
+    JSON.stringify(transactionData.testnet.signResult),
+    "testnet signStakeTransaction"
+  );
+  console.log("signStakeTransaction test successful");
+}
+function signZkTransaction() {
+  console.log("signZkTransaction test start");
+  const transactionData = window.transactionData.signZkTransaction;
+  let params = {
+    ...transactionData.testnet.signParams,
+    transaction:transactionData.testnet.signParams.transaction
+  }
+  // B62qjFNwXHfqXjFTRerWBpd9Sfdx3FfX6hQdErqjS694t1Cn2cSc8MK
+  const signResultTest = auroSignLib.signTransaction(
+    // transactionData.testnet.signParams
+    params
+  );
+  console.log('signResultTest=0',signResultTest);
+  expect(
+    JSON.stringify(signResultTest),
+    JSON.stringify(transactionData.testnet.signResult),
+    "testnet signZkTransaction"
+  );
+  console.log("signZkTransaction test successful");
+}
+function signMessageTransaction(params) {}
+
+/** test sign */
+function runTransactionTest(params) {
+  // signPayment();
+  // signStakeTransaction();
+  signZkTransaction()
+  // signMessageTransaction
+  // runVerifyTest
+}
+
 async function runTests() {
   /** test account  */
   // runAccountTest();
 
   /** test utils */
-  runUtilsTest();
+  // runUtilsTest();
+
+  /** test transaction */
+  runTransactionTest();
 
   console.log("all tests successful.");
 }

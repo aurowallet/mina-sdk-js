@@ -1,6 +1,8 @@
 import "@babel/polyfill";
 import account from "./account";
 import utils from "./utils"
+import auroSignLib from "./lib"
+
 
 // send message to JSChannel: MinaWallet
 function send(path, data) {
@@ -17,3 +19,6 @@ global.send = send;
 
 global.account = account;
 global.utils = utils
+
+global.auroSignLib = auroSignLib
+
