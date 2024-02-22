@@ -129,14 +129,35 @@ function signZkTransaction() {
   );
   console.log("signZkTransaction test successful");
 }
-function signMessageTransaction(params) {}
+function signMessage() {
+  console.log("signMessage test start");
+  const transactionData = window.transactionData.signMessageTransaction;
+  const signResultMainnet = auroSignLib.signTransaction(
+    transactionData.mainnet.signParams
+  );
+  expect(
+    JSON.stringify(signResultMainnet), 
+    JSON.stringify(transactionData.mainnet.signResult),
+    "mainnet signMessage"
+  );
+
+  const signResultTest = auroSignLib.signTransaction(
+    transactionData.testnet.signParams
+  );
+  expect(
+    JSON.stringify(signResultTest),
+    JSON.stringify(transactionData.testnet.signResult),
+    "testnet signMessage"
+  );
+  console.log("signMessage test successful");
+}
 
 /** test sign */
 function runTransactionTest(params) {
   // signPayment();
   // signStakeTransaction();
-  signZkTransaction()
-  // signMessageTransaction
+  // signZkTransaction()
+  signMessage()
   // runVerifyTest
 }
 
