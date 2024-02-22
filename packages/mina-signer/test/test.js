@@ -168,12 +168,49 @@ function signMessage() {
 
 /** test sign */
 function runTransactionTest(params) {
-  // signPayment();
-  // signStakeTransaction();
+  signPayment();
+  signStakeTransaction();
   // signZkTransaction()
   signMessage();
-  // runVerifyTest
+}
 
+async function runFieldsTest() {
+  console.log("runFieldsTest test start");
+  const transactionData = window.transactionData.signFiledsData;
+  const signResultMainnet = auroSignLib.signFields(
+    transactionData.mainnet.signParams
+  );
+  expect(
+    signResultMainnet.signature,
+    transactionData.mainnet.signResult.signature,
+    "mainnet fieldsTest"
+  );
+  const verifyResultMain = auroSignLib.verifyFieldsMessage({
+    network: "mainnet",
+    publicKey: transactionData.mainnet.signParams.publicKey,
+    signature: transactionData.mainnet.signResult.signature,
+    fields: transactionData.mainnet.signResult.data,
+  });
+  expect(verifyResultMain, true, "mainnet verifyMessage");
+  const signResultTest = auroSignLib.signFields(
+    transactionData.testnet.signParams
+  );
+  console.log("signResultTest", signResultTest);
+  expect(
+    signResultTest.signature,
+    transactionData.testnet.signResult.signature,
+    "testnet fieldsTest"
+  );
+
+  const verifyResultTest = auroSignLib.verifyFieldsMessage({
+    network: "testnet",
+    publicKey: signResultTest.publicKey,
+    signature: signResultTest.signature,
+    fields: signResultTest.data,
+  });
+  console.log("verifyResultTest", verifyResultTest);
+  expect(verifyResultTest, true, "testnet verifyFields");
+  console.log("runFieldsTest test successful");
 }
 
 async function runTests() {
@@ -184,8 +221,13 @@ async function runTests() {
   // runUtilsTest();
 
   /** test transaction */
-  runTransactionTest();
+  // runTransactionTest();
+
+  /** test fields */
+  runFieldsTest();
 
   console.log("all tests successful.");
 }
 window.runTests = runTests;
+
+async function runNullifierTest(params) {}
