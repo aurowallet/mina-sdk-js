@@ -25,7 +25,6 @@ export default {
     let signResult;
     try {
       let signBody = {};
-
       if (type === "message") {
         signBody = message;
       } else if (type === "zk") {
@@ -41,7 +40,6 @@ export default {
             memo: memo || "",
           },
         };
-        // console.log("signTransaction=signBody", signBody);
       } else {
         let decimal = new BigNumber(10).pow(decimals);
         let sendFee = new BigNumber(fee).multipliedBy(decimal).toNumber();

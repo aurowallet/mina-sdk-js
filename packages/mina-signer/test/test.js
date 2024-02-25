@@ -52,7 +52,7 @@ function runUtilsTest() {
   const testData = window.accountData;
   for (let index = 0; index < testData.length; index++) {
     const mneData = testData[index];
-    console.info(`current is ${index}, total is ${testData.length}`);
+    console.info(`utils current is ${index}, total is ${testData.length}`);
     for (let j = 0; j < mneData.account.length; j++) {
       const innerAccount = mneData.account[j];
       const status = utils.isAddressValid({
@@ -167,10 +167,10 @@ function signMessage() {
 }
 
 /** test sign */
-function runTransactionTest(params) {
+function runTransactionTest() {
   signPayment();
   signStakeTransaction();
-  // signZkTransaction()
+  signZkTransaction()
   signMessage();
 }
 
@@ -230,16 +230,16 @@ function runNullifierTest() {
 
 function runTests() {
   /** test account  */
-  // runAccountTest();
+  runAccountTest();
 
   /** test utils */
-  // runUtilsTest();
+  runUtilsTest();
 
   /** test transaction */
-  // runTransactionTest();
+  runTransactionTest();
 
   /** test fields */
-  // runFieldsTest();
+  runFieldsTest();
 
   /** create Nullifier */
   runNullifierTest();

@@ -5980,7 +5980,7 @@ mimic-response@^1.0.0, mimic-response@^1.0.1:
 
 mina-signer@3.0.0:
   version "3.0.0"
-  resolved "https://registry.npmjs.org/mina-signer/-/mina-signer-3.0.0.tgz"
+  resolved "https://registry.yarnpkg.com/mina-signer/-/mina-signer-3.0.0.tgz#c3fcc14db81e2b69776200d53241506b534ecedd"
   integrity sha512-WtpvKtgkWx0aTBXaeLg3JES8/sUyKiWbVLD8AzvtucenYNNQBtO0w48akUWrlKsjonDdffiKLu9ayY3riTGEng==
   dependencies:
     blakejs "^1.2.1"
