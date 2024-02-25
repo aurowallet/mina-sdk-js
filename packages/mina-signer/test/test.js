@@ -116,12 +116,9 @@ function signZkTransaction() {
     ...transactionData.testnet.signParams,
     transaction: transactionData.testnet.signParams.transaction,
   };
-  // B62qjFNwXHfqXjFTRerWBpd9Sfdx3FfX6hQdErqjS694t1Cn2cSc8MK
   const signResultTest = auroSignLib.signTransaction(
-    // transactionData.testnet.signParams
     params
   );
-  console.log("signResultTest=0", signResultTest);
   expect(
     JSON.stringify(signResultTest),
     JSON.stringify(transactionData.testnet.signResult),
@@ -195,7 +192,6 @@ function runFieldsTest() {
   const signResultTest = auroSignLib.signFields(
     transactionData.testnet.signParams
   );
-  console.log("signResultTest", signResultTest);
   expect(
     signResultTest.signature,
     transactionData.testnet.signResult.signature,
@@ -208,7 +204,6 @@ function runFieldsTest() {
     signature: signResultTest.signature,
     fields: signResultTest.data,
   });
-  console.log("verifyResultTest", verifyResultTest);
   expect(verifyResultTest, true, "testnet verifyFields");
   console.log("runFieldsTest test successful");
 }
@@ -223,7 +218,6 @@ function runNullifierTest() {
   const signResultTest = auroSignLib.createNullifier(
     transactionData.testnet.signParams
   );
-  console.log("signResultTest==", signResultTest);
   expect(!!signResultTest.private, true, "testnet runNullifierTest");
   console.log("runNullifierTest test successful");
 }

@@ -50441,6 +50441,9 @@ const decimals = 9;
       transaction,
       message
     } = _ref;
+    if (!privateKey) {
+      throw "must have private key";
+    }
     const signClient = new mina_signer__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"]({
       network: network
     });
@@ -50495,6 +50498,9 @@ const decimals = 9;
       privateKey,
       message
     } = _ref2;
+    if (!privateKey) {
+      throw "must have private key";
+    }
     let signResult;
     try {
       let fields = message;
@@ -50577,6 +50583,9 @@ const decimals = 9;
       privateKey,
       message
     } = _ref5;
+    if (!privateKey) {
+      throw "must have private key";
+    }
     let createResult;
     try {
       let fields = message;

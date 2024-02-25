@@ -21,6 +21,9 @@ export default {
     transaction,
     message,
   }) {
+    if(!privateKey){
+      throw("must have private key")
+    }
     const signClient = new Client({ network: network });
     let signResult;
     try {
@@ -70,6 +73,9 @@ export default {
     privateKey,
     message,
   }) {
+    if(!privateKey){
+      throw("must have private key")
+    }
     let signResult;
     try {
       let fields = message;
@@ -139,6 +145,9 @@ export default {
     privateKey,
     message,
   }) {
+    if(!privateKey){
+      throw("must have private key")
+    }
     let createResult;
     try {
       let fields = message;
