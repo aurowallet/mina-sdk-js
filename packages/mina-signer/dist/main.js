@@ -17222,7 +17222,7 @@ module.exports = {
  */
 
 /* harmony default export */ __webpack_exports__["a"] = ({
-  isAddressValid(_ref) {
+  async isAddressValid(_ref) {
     let {
       address
     } = _ref;
@@ -17236,7 +17236,7 @@ module.exports = {
       return false;
     }
   },
-  getRealErrorMsg(error) {
+  async getRealErrorMsg(error) {
     let errorMessage = "";
     try {
       if (error.message) {
@@ -50223,10 +50223,12 @@ function reverse(bytes) {
 }
 /* harmony default export */ __webpack_exports__["a"] = ({
   generateMnemonic() {
-    const mnemonic = bip39__WEBPACK_IMPORTED_MODULE_1__["generateMnemonic"]();
-    return {
-      mnemonic
-    };
+    return new Promise(resolve => {
+      const mnemonic = bip39__WEBPACK_IMPORTED_MODULE_1__["generateMnemonic"]();
+      resolve({
+        mnemonic
+      });
+    });
   },
   importWalletByMnemonic(_ref) {
     let {
@@ -50234,56 +50236,60 @@ function reverse(bytes) {
       accountIndex = 0,
       needPrivateKey = false
     } = _ref;
-    const seed = bip39__WEBPACK_IMPORTED_MODULE_1__["mnemonicToSeedSync"](mnemonic);
-    const masterNode = bip32__WEBPACK_IMPORTED_MODULE_0__["fromSeed"](seed);
-    let hdPath = "m/44'/12586'/" + accountIndex + "'/0/0";
-    const child0 = masterNode.derivePath(hdPath);
-    child0.privateKey[0] &= 0x3f;
-    const childPrivateKey = reverse(child0.privateKey);
-    const minaPrivateKeyHex = `5a01${childPrivateKey.toString("hex")}`;
-    const minaPrivateKey = bs58check__WEBPACK_IMPORTED_MODULE_2___default.a.encode(safe_buffer__WEBPACK_IMPORTED_MODULE_4__["Buffer"].from(minaPrivateKeyHex, "hex"));
-    const client = new mina_signer__WEBPACK_IMPORTED_MODULE_3__[/* default */ "a"]({
-      network: "mainnet"
+    return new Promise(resolve => {
+      const seed = bip39__WEBPACK_IMPORTED_MODULE_1__["mnemonicToSeedSync"](mnemonic);
+      const masterNode = bip32__WEBPACK_IMPORTED_MODULE_0__["fromSeed"](seed);
+      let hdPath = "m/44'/12586'/" + accountIndex + "'/0/0";
+      const child0 = masterNode.derivePath(hdPath);
+      child0.privateKey[0] &= 0x3f;
+      const childPrivateKey = reverse(child0.privateKey);
+      const minaPrivateKeyHex = `5a01${childPrivateKey.toString("hex")}`;
+      const minaPrivateKey = bs58check__WEBPACK_IMPORTED_MODULE_2___default.a.encode(safe_buffer__WEBPACK_IMPORTED_MODULE_4__["Buffer"].from(minaPrivateKeyHex, "hex"));
+      const client = new mina_signer__WEBPACK_IMPORTED_MODULE_3__[/* default */ "a"]({
+        network: "mainnet"
+      });
+      const minaPublicKey = client.derivePublicKey(minaPrivateKey);
+      let res = {
+        mnemonic: mnemonic,
+        pubKey: minaPublicKey,
+        hdIndex: accountIndex
+      };
+      if (needPrivateKey) {
+        res.priKey = minaPrivateKey;
+      }
+      resolve(res);
     });
-    const minaPublicKey = client.derivePublicKey(minaPrivateKey);
-    let res = {
-      mnemonic: mnemonic,
-      pubKey: minaPublicKey,
-      hdIndex: accountIndex
-    };
-    if (needPrivateKey) {
-      res.priKey = minaPrivateKey;
-    }
-    return res;
   },
   importWalletByPrivateKey(_ref2) {
     let {
       privateKey
     } = _ref2;
-    console.log("privateKey", privateKey);
-    const client = new mina_signer__WEBPACK_IMPORTED_MODULE_3__[/* default */ "a"]({
-      network: "mainnet"
+    return new Promise(resolve => {
+      console.log("privateKey", privateKey);
+      const client = new mina_signer__WEBPACK_IMPORTED_MODULE_3__[/* default */ "a"]({
+        network: "mainnet"
+      });
+      const minaPublicKey = client.derivePublicKey(privateKey);
+      console.log("minaPublicKey", minaPublicKey);
+      resolve({
+        priKey: privateKey,
+        pubKey: minaPublicKey
+      });
     });
-    const minaPublicKey = client.derivePublicKey(privateKey);
-    console.log("minaPublicKey", minaPublicKey);
-    return {
-      priKey: privateKey,
-      pubKey: minaPublicKey
-    };
   },
-  importWallet(_ref3) {
+  async importWallet(_ref3) {
     let {
       key: mnemonicOrPrivateKey,
       keyType
     } = _ref3;
     switch (keyType) {
       case "priKey":
-        return this.importWalletByPrivateKey({
+        return await this.importWalletByPrivateKey({
           privateKey: mnemonicOrPrivateKey
         });
       case "mnemonic":
       default:
-        return this.importWalletByMnemonic({
+        return await this.importWalletByMnemonic({
           mnemonic: mnemonicOrPrivateKey
         });
     }
@@ -50428,7 +50434,7 @@ const decimals = 9;
   signTransaction(_ref) {
     let {
       network = "mainnet",
-      // | "testnet", 
+      // | "testnet",
       type = "payment",
       // | "delegation" | "zk" | "message",
       privateKey,
@@ -50441,55 +50447,57 @@ const decimals = 9;
       transaction,
       message
     } = _ref;
-    if (!privateKey) {
-      throw "must have private key";
-    }
-    const signClient = new mina_signer__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"]({
-      network: network
-    });
-    let signResult;
-    try {
-      let signBody = {};
-      if (type === "message") {
-        signBody = message;
-      } else if (type === "zk") {
-        let decimal = new bignumber_js__WEBPACK_IMPORTED_MODULE_0___default.a(10).pow(decimals);
-        let sendFee = new bignumber_js__WEBPACK_IMPORTED_MODULE_0___default.a(fee).multipliedBy(decimal).toNumber();
-        signBody = {
-          zkappCommand: JSON.parse(transaction),
-          feePayer: {
-            feePayer: fromAddress,
+    return new Promise((resolve, reject) => {
+      if (!privateKey) {
+        reject("must have private key");
+      }
+      const signClient = new mina_signer__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"]({
+        network: network
+      });
+      let signResult;
+      try {
+        let signBody = {};
+        if (type === "message") {
+          signBody = message;
+        } else if (type === "zk") {
+          let decimal = new bignumber_js__WEBPACK_IMPORTED_MODULE_0___default.a(10).pow(decimals);
+          let sendFee = new bignumber_js__WEBPACK_IMPORTED_MODULE_0___default.a(fee).multipliedBy(decimal).toNumber();
+          signBody = {
+            zkappCommand: JSON.parse(transaction),
+            feePayer: {
+              feePayer: fromAddress,
+              fee: sendFee,
+              nonce: nonce,
+              memo: memo || ""
+            }
+          };
+        } else {
+          let decimal = new bignumber_js__WEBPACK_IMPORTED_MODULE_0___default.a(10).pow(decimals);
+          let sendFee = new bignumber_js__WEBPACK_IMPORTED_MODULE_0___default.a(fee).multipliedBy(decimal).toNumber();
+          signBody = {
+            to: toAddress,
+            from: fromAddress,
             fee: sendFee,
             nonce: nonce,
             memo: memo || ""
+          };
+          if (type === "payment") {
+            let sendAmount = new bignumber_js__WEBPACK_IMPORTED_MODULE_0___default.a(amount).multipliedBy(decimal).toNumber();
+            signBody.amount = sendAmount;
+          }
+        }
+        signResult = signClient.signTransaction(signBody, privateKey);
+      } catch (err) {
+        let errorMessage = _utils__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"].getRealErrorMsg(err) || i18n.t("buildFailed");
+        signResult = {
+          error: {
+            message: errorMessage
           }
         };
-      } else {
-        let decimal = new bignumber_js__WEBPACK_IMPORTED_MODULE_0___default.a(10).pow(decimals);
-        let sendFee = new bignumber_js__WEBPACK_IMPORTED_MODULE_0___default.a(fee).multipliedBy(decimal).toNumber();
-        signBody = {
-          to: toAddress,
-          from: fromAddress,
-          fee: sendFee,
-          nonce: nonce,
-          memo: memo || ""
-        };
-        if (type === "payment") {
-          let sendAmount = new bignumber_js__WEBPACK_IMPORTED_MODULE_0___default.a(amount).multipliedBy(decimal).toNumber();
-          signBody.amount = sendAmount;
-        }
+      } finally {
+        resolve(signResult);
       }
-      signResult = signClient.signTransaction(signBody, privateKey);
-    } catch (err) {
-      let errorMessage = _utils__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"].getRealErrorMsg(err) || i18n.t("buildFailed");
-      signResult = {
-        error: {
-          message: errorMessage
-        }
-      };
-    } finally {
-      return signResult;
-    }
+    });
   },
   signFields(_ref2) {
     let {
@@ -50498,27 +50506,30 @@ const decimals = 9;
       privateKey,
       message
     } = _ref2;
-    if (!privateKey) {
-      throw "must have private key";
-    }
-    let signResult;
-    try {
-      let fields = message;
-      const nextFields = fields.map(BigInt);
-      const signClient = new mina_signer__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"]({
-        network: network
-      });
-      signResult = signClient.signFields(nextFields, privateKey);
-      signResult.data = fields;
-    } catch (err) {
-      let errorMessage = _utils__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"].getRealErrorMsg(err) || i18n.t("buildFailed");
-      signResult = {
-        error: {
-          message: errorMessage
-        }
-      };
-    }
-    return signResult;
+    return new Promise((resolve, reject) => {
+      if (!privateKey) {
+        reject("must have private key");
+      }
+      let signResult;
+      try {
+        let fields = message;
+        const nextFields = fields.map(BigInt);
+        const signClient = new mina_signer__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"]({
+          network: network
+        });
+        signResult = signClient.signFields(nextFields, privateKey);
+        signResult.data = fields;
+      } catch (err) {
+        let errorMessage = _utils__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"].getRealErrorMsg(err) || i18n.t("buildFailed");
+        signResult = {
+          error: {
+            message: errorMessage
+          }
+        };
+      }
+      // return signResult;
+      resolve(signResult);
+    });
   },
   verifyMessage(_ref3) {
     let {
@@ -50528,25 +50539,27 @@ const decimals = 9;
       signature,
       verifyMessage
     } = _ref3;
-    let verifyResult;
-    try {
-      const nextSignature = typeof signature === "string" ? JSON.parse(signature) : signature;
-      const signClient = new mina_signer__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"]({
-        network: network
-      });
-      const verifyBody = {
-        data: verifyMessage,
-        publicKey: publicKey,
-        signature: nextSignature
-      };
-      verifyResult = signClient.verifyMessage(verifyBody);
-    } catch (error) {
-      verifyResult = {
-        message: "Verify failed.",
-        code: 20002
-      };
-    }
-    return verifyResult;
+    return new Promise(resolve => {
+      let verifyResult;
+      try {
+        const nextSignature = typeof signature === "string" ? JSON.parse(signature) : signature;
+        const signClient = new mina_signer__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"]({
+          network: network
+        });
+        const verifyBody = {
+          data: verifyMessage,
+          publicKey: publicKey,
+          signature: nextSignature
+        };
+        verifyResult = signClient.verifyMessage(verifyBody);
+      } catch (error) {
+        verifyResult = {
+          message: "Verify failed.",
+          code: 20002
+        };
+      }
+      resolve(verifyResult);
+    });
   },
   verifyFieldsMessage(_ref4) {
     let {
@@ -50556,25 +50569,27 @@ const decimals = 9;
       signature,
       fields
     } = _ref4;
-    let verifyResult;
-    try {
-      const signClient = new mina_signer__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"]({
-        network: network
-      });
-      const nextFields = fields.map(BigInt);
-      const verifyBody = {
-        data: nextFields,
-        publicKey: publicKey,
-        signature: signature
-      };
-      verifyResult = signClient.verifyFields(verifyBody);
-    } catch (error) {
-      verifyResult = {
-        message: "Verify failed.",
-        code: 20002
-      };
-    }
-    return verifyResult;
+    return new Promise(resolve => {
+      let verifyResult;
+      try {
+        const signClient = new mina_signer__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"]({
+          network: network
+        });
+        const nextFields = fields.map(BigInt);
+        const verifyBody = {
+          data: nextFields,
+          publicKey: publicKey,
+          signature: signature
+        };
+        verifyResult = signClient.verifyFields(verifyBody);
+      } catch (error) {
+        verifyResult = {
+          message: "Verify failed.",
+          code: 20002
+        };
+      }
+      resolve(verifyResult);
+    });
   },
   createNullifier(_ref5) {
     let {
@@ -50583,27 +50598,29 @@ const decimals = 9;
       privateKey,
       message
     } = _ref5;
-    if (!privateKey) {
-      throw "must have private key";
-    }
-    let createResult;
-    try {
-      let fields = message;
-      const nextFields = fields.map(BigInt);
-      const signClient = new mina_signer__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"]({
-        network: network
-      });
-      createResult = signClient.createNullifier(nextFields, privateKey);
-      createResult.data = fields;
-    } catch (err) {
-      let errorMessage = _utils__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"].getRealErrorMsg(err) || i18n.t("buildFailed");
-      createResult = {
-        error: {
-          message: errorMessage
-        }
-      };
-    }
-    return createResult;
+    return new Promise((resolve, reject) => {
+      if (!privateKey) {
+        reject("must have private key");
+      }
+      let createResult;
+      try {
+        let fields = message;
+        const nextFields = fields.map(BigInt);
+        const signClient = new mina_signer__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"]({
+          network: network
+        });
+        createResult = signClient.createNullifier(nextFields, privateKey);
+        createResult.data = fields;
+      } catch (err) {
+        let errorMessage = _utils__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"].getRealErrorMsg(err) || i18n.t("buildFailed");
+        createResult = {
+          error: {
+            message: errorMessage
+          }
+        };
+      }
+      resolve(createResult);
+    });
   }
 });
 
@@ -50640,6 +50657,10 @@ global.send = send;
 global.account = _account__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"];
 global.utils = _utils__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"];
 global.auroSignLib = _lib__WEBPACK_IMPORTED_MODULE_3__[/* default */ "a"];
+const minaSignerVersion = async () => {
+  return "3.0.4-1001";
+};
+global.minaSignerVersion = minaSignerVersion;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(14)))
 
 /***/ }),
