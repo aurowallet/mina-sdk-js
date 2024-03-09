@@ -21,9 +21,10 @@ export default {
     transaction,
     message,
   }) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       if (!privateKey) {
-        reject("must have private key");
+        reject({ message: "must have private key" });
+        return;
       }
       const signClient = new Client({ network: network });
       let signResult;
@@ -63,7 +64,8 @@ export default {
         }
         signResult = signClient.signTransaction(signBody, privateKey);
       } catch (err) {
-        let errorMessage = utils.getRealErrorMsg(err) || i18n.t("buildFailed");
+        let errorMessage =
+          (await utils.getRealErrorMsg(err)) || i18n.t("buildFailed");
         signResult = { error: { message: errorMessage } };
       } finally {
         resolve(signResult);
@@ -75,9 +77,10 @@ export default {
     privateKey,
     message,
   }) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       if (!privateKey) {
-        reject("must have private key");
+        reject({ message: "must have private key" });
+        return;
       }
       let signResult;
       try {
@@ -87,7 +90,8 @@ export default {
         signResult = signClient.signFields(nextFields, privateKey);
         signResult.data = fields;
       } catch (err) {
-        let errorMessage = utils.getRealErrorMsg(err) || i18n.t("buildFailed");
+        let errorMessage =
+          (await utils.getRealErrorMsg(err)) || i18n.t("buildFailed");
         signResult = { error: { message: errorMessage } };
       }
       // return signResult;
@@ -113,12 +117,10 @@ export default {
         };
         verifyResult = signClient.verifyMessage(verifyBody);
       } catch (error) {
-        verifyResult = {
-          message: "Verify failed.",
-          code: 20002,
-        };
+        verifyResult = false;
+      } finally {
+        resolve(verifyResult);
       }
-      resolve(verifyResult);
     });
   },
 
@@ -141,12 +143,10 @@ export default {
         };
         verifyResult = signClient.verifyFields(verifyBody);
       } catch (error) {
-        verifyResult = {
-          message: "Verify failed.",
-          code: 20002,
-        };
+        verifyResult = false;
+      } finally {
+        resolve(verifyResult);
       }
-      resolve(verifyResult);
     });
   },
   createNullifier({
@@ -154,9 +154,10 @@ export default {
     privateKey,
     message,
   }) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       if (!privateKey) {
-        reject("must have private key");
+        reject({ message: "must have private key" });
+        return;
       }
       let createResult;
       try {
@@ -166,7 +167,8 @@ export default {
         createResult = signClient.createNullifier(nextFields, privateKey);
         createResult.data = fields;
       } catch (err) {
-        let errorMessage = utils.getRealErrorMsg(err) || i18n.t("buildFailed");
+        let errorMessage =
+          (await utils.getRealErrorMsg(err)) || i18n.t("buildFailed");
         createResult = { error: { message: errorMessage } };
       }
       resolve(createResult);

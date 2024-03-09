@@ -56,7 +56,7 @@ async function runUtilsTest() {
   const testData = window.accountData;
   for (let index = 0; index < testData.length; index++) {
     const mneData = testData[index];
-    console.info(`utils current is ${index}, total is ${testData.length}`);
+    // console.info(`utils current is ${index}, total is ${testData.length}`);
     for (let j = 0; j < mneData.account.length; j++) {
       const innerAccount = mneData.account[j];
       const status = await utils.isAddressValid({

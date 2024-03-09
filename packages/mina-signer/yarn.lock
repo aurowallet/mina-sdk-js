@@ -5978,10 +5978,10 @@ mimic-response@^1.0.0, mimic-response@^1.0.1:
   resolved "https://registry.npmjs.org/mimic-response/-/mimic-response-1.0.1.tgz"
   integrity sha512-j5EctnkH7amfV/q5Hgmoal1g2QHFJRraOtmx0JpIqkxhBhI/lJSl1nMpQ45hVarwNETOoWEimndZ4QK0RHxuxQ==
 
-mina-signer@3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/mina-signer/-/mina-signer-3.0.0.tgz#c3fcc14db81e2b69776200d53241506b534ecedd"
-  integrity sha512-WtpvKtgkWx0aTBXaeLg3JES8/sUyKiWbVLD8AzvtucenYNNQBtO0w48akUWrlKsjonDdffiKLu9ayY3riTGEng==
+mina-signer@3.0.4:
+  version "3.0.4"
+  resolved "https://registry.yarnpkg.com/mina-signer/-/mina-signer-3.0.4.tgz#67bf46e4766338d8532d7371d105ec1b515b7e22"
+  integrity sha512-5lPSxNDBro/qFfrEwc/yiYzSQ1Eq9ccSFlF/XJhPc0hnQQ48FFUU0iwQ0k2NNSW+XEZgMMVVEWOSb7eRROQBsA==
   dependencies:
     blakejs "^1.2.1"
     js-sha256 "^0.9.0"

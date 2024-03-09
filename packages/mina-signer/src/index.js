@@ -13,7 +13,7 @@ function send(path, data) {
   }
 }
 
-send("log", "main js loaded");
+send("log", "bridge js loaded");
 global.send = send;
 
 global.account = account;

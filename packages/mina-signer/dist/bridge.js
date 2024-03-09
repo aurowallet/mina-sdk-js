@@ -7022,7 +7022,9 @@ if (__webpack_require__(11)) {
 "use strict";
 
 // EXPORTS
-__webpack_require__.d(__webpack_exports__, "a", function() { return /* binding */ MinaSigner_Client; });
+__webpack_require__.d(__webpack_exports__, "a", function() { return /* binding */ mina_signer_Client; });
+
+// UNUSED EXPORTS: Client
 
 // CONCATENATED MODULE: ./node_modules/mina-signer/dist/node/lib/util/assert.js
 
@@ -7248,7 +7250,7 @@ var crypto_browserify = __webpack_require__(243);
 function randomBytes(n) {
   return new Uint8Array(Object(crypto_browserify["randomBytes"])(n));
 }
-// CONCATENATED MODULE: ./node_modules/mina-signer/dist/node/bindings/crypto/finite_field.js
+// CONCATENATED MODULE: ./node_modules/mina-signer/dist/node/bindings/crypto/finite-field.js
 
 
 
@@ -7466,7 +7468,7 @@ function createField(p, constants) {
   const kmax = BigInt(2 * n * w);
   // constant for correcting 2^k/x -> 1/x, by multiplying with 2^-kmax * 2^(kmax - k)
   const twoToMinusKmax = inverse(1n << kmax, p);
-  assert(twoToMinusKmax !== undefined, '2^-kmax exists');
+  const exportedInverse = twoToMinusKmax !== undefined ? x => fastInverse(x, p, n, kmax, twoToMinusKmax) : x => inverse(x, p);
   return {
     modulus: p,
     sizeInBits,
@@ -7491,12 +7493,9 @@ function createField(p, constants) {
     mul(x, y) {
       return mod(x * y, p);
     },
-    inverse(x) {
-      // return inverse(x, p);
-      return fastInverse(x, p, n, kmax, twoToMinusKmax);
-    },
+    inverse: exportedInverse,
     div(x, y) {
-      let yinv = fastInverse(y, p, n, kmax, twoToMinusKmax);
+      let yinv = exportedInverse(y);
       if (yinv === undefined) return;
       return mod(x * yinv, p);
     },
@@ -8056,7 +8055,7 @@ function divideAndRound(x, y) {
   if (2n * (x - z * y) >= y) z++;
   return signz * z;
 }
-// CONCATENATED MODULE: ./node_modules/mina-signer/dist/node/bindings/crypto/elliptic_curve.js
+// CONCATENATED MODULE: ./node_modules/mina-signer/dist/node/bindings/crypto/elliptic-curve.js
 
 
 
@@ -8627,7 +8626,8 @@ let prefixes = {
   "event": "MinaZkappEvent******",
   "events": "MinaZkappEvents*****",
   "sequenceEvents": "MinaZkappSeqEvents**",
-  "body": "TestnetZkappBody****",
+  "zkappBodyMainnet": "MainnetZkappBody****",
+  "zkappBodyTestnet": "TestnetZkappBody****",
   "accountUpdateCons": "MinaAcctUpdateCons**",
   "accountUpdateNode": "MinaAcctUpdateNode**",
   "zkappMemo": "MinaZkappMemo*******",
@@ -8660,6 +8660,7 @@ let prefixHashes = {
   "MinaSideLoadedVk****": ["27153629295534844750482612843518005572402188741101822965689207110291504095805", "11073437601016088346212553894160581939150688827288603152461976873708720172824", "9169013693168830396847022454402673046094697740892173219744332585469764409612"],
   "MinaZkappAccount****": ["11742420651603425685690711434636216727968618158667382343736587130720645535016", "20917169788479399921968659996772666237321879817943938162255353371266230737562", "20221577186851444354528754069740362935513598751580381763045954351047955571417"],
   "MinaZkappPayload****": ["15735138827391397348912010094577234813869450438840158969759900004702547928125", "25095612872941242247876048162039143509752212627701285511972307921367391645919", "7245494597725009330136300549232949784423520250577599502394596645257342395146"],
+  "MainnetZkappBody****": ["10214915150831852734808709087755641273868350720962413399868532305813227181967", "19231103515031626108540280352804904215178644233964839448405623573586547300771", "3202185325412846279878024015439663797323768206239602518916650099275135615824"],
   "TestnetZkappBody****": ["20037733640875789833090442509053816933966165101372309054048970230906793051053", "1106678471497583468621635190733109842219273971961053291385773425960251864224", "25565387364959491931899708566015584890804577695743228799735258954982776499278"],
   "MinaZkappPred*******": ["1288860557840839698672685006364179285130411098848600694737282320588924548492", "24648295833336558525603848295184424886548932461541421142783307792871113347031", "1330615836835056811243082335077124866238751435915242573993316916713469087050"],
   "MinaZkappPredAcct***": ["16247099195538206941970428186933809576049890124762896310373916059400681012938", "15171999803179862436296250357712424012107969488385552487664863256867849154640", "4695118160519310765712802705640939163487421977728313886668234870398464448283"],
@@ -9689,7 +9690,7 @@ const PrivateKey = {
     return PublicKey.fromGroup(Group.scale(Group.generatorMina, key));
   }
 };
-// CONCATENATED MODULE: ./node_modules/mina-signer/dist/node/mina-signer/src/Utils.js
+// CONCATENATED MODULE: ./node_modules/mina-signer/dist/node/mina-signer/src/utils.js
 function hasCommonProperties(data) {
   return data.hasOwnProperty('to') && data.hasOwnProperty('from') && data.hasOwnProperty('fee') && data.hasOwnProperty('nonce');
 }
@@ -10116,9 +10117,9 @@ function createPoseidon(Fp, _ref) {
   if (partialRounds !== 0) {
     throw Error("we don't support partial rounds");
   }
-  assertPositiveInteger(rate, "rate must be a positive integer");
-  assertPositiveInteger(fullRounds, "fullRounds must be a positive integer");
-  assertPositiveInteger(power_, "power must be a positive integer");
+  assertPositiveInteger(rate, 'rate must be a positive integer');
+  assertPositiveInteger(fullRounds, 'fullRounds must be a positive integer');
+  assertPositiveInteger(power_, 'power must be a positive integer');
   let power = BigInt(power_);
   let roundConstants = roundConstants_.map(arr => arr.map(BigInt));
   let mds = mds_.map(arr => arr.map(BigInt));
@@ -13185,7 +13186,14 @@ const Memo = {
 // EXTERNAL MODULE: ./node_modules/blakejs/index.js
 var blakejs = __webpack_require__(68);
 
+// CONCATENATED MODULE: ./node_modules/mina-signer/dist/node/mina-signer/src/types.js
+const NetworkId = {
+  toString(network) {
+    return typeof network === 'string' ? network : network.custom;
+  }
+};
 // CONCATENATED MODULE: ./node_modules/mina-signer/dist/node/mina-signer/src/signature.js
+
 
 
 
@@ -13306,10 +13314,10 @@ function deriveNonce(message, publicKey, privateKey, networkId) {
     y
   } = publicKey;
   let d = field_bigint_Field(privateKey);
-  let id = networkId === 'mainnet' ? networkIdMainnet : networkIdTestnet;
+  let id = getNetworkIdHashInput(networkId);
   let input = HashInput.append(message, {
     fields: [x, y, d],
-    packed: [[id, 8]]
+    packed: [id]
   });
   let packedInput = poseidon_bigint_packToFields(input);
   let inputBits = packedInput.map(field_bigint_Field.toBits).flat();
@@ -13344,8 +13352,7 @@ function hashMessage(message, publicKey, r, networkId) {
   let input = HashInput.append(message, {
     fields: [x, y, r]
   });
-  let prefix = networkId === 'mainnet' ? prefixes.signatureMainnet : prefixes.signatureTestnet;
-  return poseidon_bigint_hashWithPrefix(prefix, poseidon_bigint_packToFields(input));
+  return poseidon_bigint_hashWithPrefix(signaturePrefix(networkId), poseidon_bigint_packToFields(input));
 }
 /**
  * Verifies a signature created by {@link sign}, returns `true` if (and only if) the signature is valid.
@@ -13437,7 +13444,7 @@ function deriveNonceLegacy(message, publicKey, privateKey, networkId) {
     y
   } = publicKey;
   let scalarBits = curve_bigint_Scalar.toBits(privateKey);
-  let id = networkId === 'mainnet' ? networkIdMainnet : networkIdTestnet;
+  let id = getNetworkIdHashInput(networkId)[0];
   let idBits = bytesToBits([Number(id)]);
   let input = HashInputLegacy.append(message, {
     fields: [x, y],
@@ -13468,9 +13475,64 @@ function hashMessageLegacy(message, publicKey, r, networkId) {
     fields: [x, y, r],
     bits: []
   });
-  let prefix = networkId === 'mainnet' ? prefixes.signatureMainnet : prefixes.signatureTestnet;
+  let prefix = signaturePrefix(networkId);
   return HashLegacy.hashWithPrefix(prefix, packToFieldsLegacy(input));
 }
+const numberToBytePadded = b => b.toString(2).padStart(8, '0');
+function networkIdOfString(n) {
+  let l = n.length;
+  let acc = '';
+  for (let i = l - 1; i >= 0; i--) {
+    let b = n.charCodeAt(i);
+    let padded = numberToBytePadded(b);
+    acc = acc.concat(padded);
+  }
+  return [BigInt('0b' + acc), acc.length];
+}
+function getNetworkIdHashInput(network) {
+  let s = NetworkId.toString(network);
+  switch (s) {
+    case 'mainnet':
+      return [networkIdMainnet, 8];
+    case 'testnet':
+      return [networkIdTestnet, 8];
+    default:
+      return networkIdOfString(s);
+  }
+}
+const createCustomPrefix = prefix => {
+  const maxLength = 20;
+  const paddingChar = '*';
+  let length = prefix.length;
+  if (length <= maxLength) {
+    let diff = maxLength - length;
+    return prefix + paddingChar.repeat(diff);
+  } else {
+    return prefix.substring(0, maxLength);
+  }
+};
+const signaturePrefix = network => {
+  let s = NetworkId.toString(network);
+  switch (s) {
+    case 'mainnet':
+      return prefixes.signatureMainnet;
+    case 'testnet':
+      return prefixes.signatureTestnet;
+    default:
+      return createCustomPrefix(s + 'Signature');
+  }
+};
+const zkAppBodyPrefix = network => {
+  let s = NetworkId.toString(network);
+  switch (s) {
+    case 'mainnet':
+      return prefixes.zkappBodyMainnet;
+    case 'testnet':
+      return prefixes.zkappBodyTestnet;
+    default:
+      return createCustomPrefix(s + 'ZkappBody');
+  }
+};
 // CONCATENATED MODULE: ./node_modules/mina-signer/dist/node/mina-signer/src/sign-zkapp-command.js
 
 
@@ -13488,7 +13550,7 @@ function signZkappCommand(zkappCommand_, privateKeyBase58, networkId) {
   let {
     commitment,
     fullCommitment
-  } = sign_zkapp_command_transactionCommitments(zkappCommand);
+  } = sign_zkapp_command_transactionCommitments(zkappCommand, networkId);
   let privateKey = PrivateKey.fromBase58(privateKeyBase58);
   let publicKey = zkappCommand.feePayer.body.publicKey;
   // sign fee payer
@@ -13514,7 +13576,7 @@ function verifyZkappCommandSignature(zkappCommand_, publicKeyBase58, networkId) 
   let {
     commitment,
     fullCommitment
-  } = sign_zkapp_command_transactionCommitments(zkappCommand);
+  } = sign_zkapp_command_transactionCommitments(zkappCommand, networkId);
   let publicKey = PublicKey.fromBase58(publicKeyBase58);
   // verify fee payer signature
   let signature = Signature.fromBase58(zkappCommand.feePayer.authorization);
@@ -13549,14 +13611,14 @@ function verifyAccountUpdateSignature(update, transactionCommitments, networkId)
   let signature = Signature.fromBase58(update.authorization.signature);
   return verifyFieldElement(signature, usedCommitment, publicKey, networkId);
 }
-function sign_zkapp_command_transactionCommitments(zkappCommand) {
+function sign_zkapp_command_transactionCommitments(zkappCommand, networkId) {
   if (!isCallDepthValid(zkappCommand)) {
     throw Error('zkapp command: invalid call depth');
   }
   let callForest = accountUpdatesToCallForest(zkappCommand.accountUpdates);
-  let commitment = callForestHash(callForest);
+  let commitment = callForestHash(callForest, networkId);
   let memoHash = Memo.hash(Memo.fromBase58(zkappCommand.memo));
-  let feePayerDigest = feePayerHash(zkappCommand.feePayer);
+  let feePayerDigest = feePayerHash(zkappCommand.feePayer, networkId);
   let fullCommitment = poseidon_bigint_hashWithPrefix(prefixes.accountUpdateCons, [memoHash, feePayerDigest, commitment]);
   return {
     commitment,
@@ -13583,19 +13645,22 @@ function accountUpdatesToCallForest(updates) {
   }
   return forest;
 }
-function accountUpdateHash(update) {
+function accountUpdateHash(update, networkId) {
   assertAuthorizationKindValid(update);
   let input = AccountUpdate.toInput(update);
   let fields = poseidon_bigint_packToFields(input);
-  return poseidon_bigint_hashWithPrefix(prefixes.body, fields);
+  return poseidon_bigint_hashWithPrefix(zkAppBodyPrefix(networkId), fields);
 }
-function callForestHash(forest) {
-  let stackHash = 0n;
+function callForestHash(forest, networkId) {
+  return callForestHashGeneric(forest, accountUpdateHash, poseidon_bigint_hashWithPrefix, 0n, networkId);
+}
+function callForestHashGeneric(forest, hash, hashWithPrefix, emptyHash, networkId) {
+  let stackHash = emptyHash;
   for (let callTree of [...forest].reverse()) {
-    let calls = callForestHash(callTree.children);
-    let treeHash = accountUpdateHash(callTree.accountUpdate);
-    let nodeHash = poseidon_bigint_hashWithPrefix(prefixes.accountUpdateNode, [treeHash, calls]);
-    stackHash = poseidon_bigint_hashWithPrefix(prefixes.accountUpdateCons, [nodeHash, stackHash]);
+    let calls = callForestHashGeneric(callTree.children, hash, hashWithPrefix, emptyHash, networkId);
+    let treeHash = hash(callTree.accountUpdate, networkId);
+    let nodeHash = hashWithPrefix(prefixes.accountUpdateNode, [treeHash, calls]);
+    stackHash = hashWithPrefix(prefixes.accountUpdateCons, [nodeHash, stackHash]);
   }
   return stackHash;
 }
@@ -13605,9 +13670,9 @@ function createFeePayer(feePayer) {
     body: feePayer
   };
 }
-function feePayerHash(feePayer) {
+function feePayerHash(feePayer, networkId) {
   let accountUpdate = accountUpdateFromFeePayer(feePayer);
-  return accountUpdateHash(accountUpdate);
+  return accountUpdateHash(accountUpdate, networkId);
 }
 function accountUpdateFromFeePayer(_ref) {
   let {
@@ -14113,9 +14178,9 @@ function fieldToHex(binable, x) {
   let paddingBit = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
   let bytes = binable.toBytes(x);
   // set highest bit (which is empty)
-  bytes[bytes.length - 1] &= Number(paddingBit) << 7;
-  // map each byte to a hex string of length 2
-  return bytes.map(byte => byte.toString(16).split('').reverse().join('')).join('');
+  bytes[bytes.length - 1] |= Number(paddingBit) << 7;
+  // map each byte to a 0-padded hex string of length 2
+  return bytes.map(byte => byte.toString(16).padStart(2, '0').split('').reverse().join('')).join('');
 }
 function fieldFromHex(binable, hex) {
   let bytes = [];
@@ -14259,7 +14324,7 @@ function nullifier_toString(_ref) {
     y: y.toString()
   };
 }
-// CONCATENATED MODULE: ./node_modules/mina-signer/dist/node/mina-signer/MinaSigner.js
+// CONCATENATED MODULE: ./node_modules/mina-signer/dist/node/mina-signer/mina-signer.js
 
 
 
@@ -14272,16 +14337,12 @@ function nullifier_toString(_ref) {
 
 
 const defaultValidUntil = '4294967295';
-class MinaSigner_Client {
-  constructor(options) {
-    if (!(options !== null && options !== void 0 && options.network)) {
-      throw Error('Invalid Specified Network');
-    }
-    const specifiedNetwork = options.network.toLowerCase();
-    if (specifiedNetwork !== 'mainnet' && specifiedNetwork !== 'testnet') {
-      throw Error('Invalid Specified Network');
-    }
-    this.network = specifiedNetwork;
+class mina_signer_Client {
+  constructor(_ref) {
+    let {
+      network
+    } = _ref;
+    this.network = network;
   }
   /**
    * Generates a public/private key pair
@@ -14304,11 +14365,11 @@ class MinaSigner_Client {
    * @param keypair A key pair
    * @returns True if the `keypair` is a verifiable key pair, otherwise throw an exception
    */
-  verifyKeypair(_ref) {
+  verifyKeypair(_ref2) {
     let {
       privateKey,
       publicKey
-    } = _ref;
+    } = _ref2;
     let derivedPublicKey = PrivateKey.toPublicKey(PrivateKey.fromBase58(privateKey));
     let originalPublicKey = PublicKey.fromBase58(publicKey);
     if (derivedPublicKey.x !== originalPublicKey.x || derivedPublicKey.isOdd !== originalPublicKey.isOdd) {
@@ -14367,12 +14428,12 @@ class MinaSigner_Client {
    * @returns True if the `signedFields` contains a valid signature matching
    * the fields and publicKey.
    */
-  verifyFields(_ref2) {
+  verifyFields(_ref3) {
     let {
       data,
       signature,
       publicKey
-    } = _ref2;
+    } = _ref3;
     return verify(Signature.fromBase58(signature), {
       fields: data
     }, PublicKey.fromBase58(publicKey), 'testnet');
@@ -14400,12 +14461,12 @@ class MinaSigner_Client {
    * @returns True if the `signedMessage` contains a valid signature matching
    * the message and publicKey.
    */
-  verifyMessage(_ref3) {
+  verifyMessage(_ref4) {
     let {
       data,
       signature,
       publicKey
-    } = _ref3;
+    } = _ref4;
     return verifyStringSignature(data, signature, publicKey, this.network);
   }
   /**
@@ -14461,12 +14522,12 @@ class MinaSigner_Client {
    * @param signedPayment A signed payment transaction
    * @returns True if the `signedPayment` is a verifiable payment
    */
-  verifyPayment(_ref4) {
+  verifyPayment(_ref5) {
     let {
       data,
       signature,
       publicKey
-    } = _ref4;
+    } = _ref5;
     let {
       fee,
       to,
@@ -14542,12 +14603,12 @@ class MinaSigner_Client {
    * @param signedStakeDelegation A signed stake delegation
    * @returns True if the `signedStakeDelegation` is a verifiable stake delegation
    */
-  verifyStakeDelegation(_ref5) {
+  verifyStakeDelegation(_ref6) {
     let {
       data,
       signature,
       publicKey
-    } = _ref5;
+    } = _ref6;
     let {
       fee,
       to,
@@ -14575,11 +14636,11 @@ class MinaSigner_Client {
    * @param signedPayment A signed payment transaction
    * @returns A transaction hash
    */
-  hashPayment(_ref6, options) {
+  hashPayment(_ref7, options) {
     let {
       data,
       signature
-    } = _ref6;
+    } = _ref7;
     let {
       fee,
       to,
@@ -14612,11 +14673,11 @@ class MinaSigner_Client {
    * @param signedStakeDelegation A signed stake delegation
    * @returns A transaction hash
    */
-  hashStakeDelegation(_ref7, options) {
+  hashStakeDelegation(_ref8, options) {
     let {
       data,
       signature
-    } = _ref7;
+    } = _ref8;
     let {
       fee,
       to,
@@ -14651,11 +14712,11 @@ class MinaSigner_Client {
    * @param privateKey The fee payer private key
    * @returns Signed `zkappCommand`
    */
-  signZkappCommand(_ref8, privateKey) {
+  signZkappCommand(_ref9, privateKey) {
     let {
       feePayer: feePayer_,
       zkappCommand
-    } = _ref8;
+    } = _ref9;
     let accountUpdates = zkappCommand.accountUpdates;
     let minimumFee = this.getAccountUpdateMinimumFee(accountUpdates);
     let feePayer = validFeePayer(feePayer_, minimumFee);
@@ -14696,12 +14757,12 @@ class MinaSigner_Client {
    * @param signedZkappCommand A signed zkApp transaction
    * @returns True if the signature is valid
    */
-  verifyZkappCommand(_ref9) {
+  verifyZkappCommand(_ref10) {
     let {
       data,
       publicKey,
       signature
-    } = _ref9;
+    } = _ref10;
     return signature === data.zkappCommand.feePayer.authorization && verifyZkappCommandSignature(data.zkappCommand, publicKey, this.network);
   }
   /**
@@ -50447,9 +50508,12 @@ const decimals = 9;
       transaction,
       message
     } = _ref;
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       if (!privateKey) {
-        reject("must have private key");
+        reject({
+          message: "must have private key"
+        });
+        return;
       }
       const signClient = new mina_signer__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"]({
         network: network
@@ -50488,7 +50552,7 @@ const decimals = 9;
         }
         signResult = signClient.signTransaction(signBody, privateKey);
       } catch (err) {
-        let errorMessage = _utils__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"].getRealErrorMsg(err) || i18n.t("buildFailed");
+        let errorMessage = (await _utils__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"].getRealErrorMsg(err)) || i18n.t("buildFailed");
         signResult = {
           error: {
             message: errorMessage
@@ -50506,9 +50570,12 @@ const decimals = 9;
       privateKey,
       message
     } = _ref2;
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       if (!privateKey) {
-        reject("must have private key");
+        reject({
+          message: "must have private key"
+        });
+        return;
       }
       let signResult;
       try {
@@ -50520,7 +50587,7 @@ const decimals = 9;
         signResult = signClient.signFields(nextFields, privateKey);
         signResult.data = fields;
       } catch (err) {
-        let errorMessage = _utils__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"].getRealErrorMsg(err) || i18n.t("buildFailed");
+        let errorMessage = (await _utils__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"].getRealErrorMsg(err)) || i18n.t("buildFailed");
         signResult = {
           error: {
             message: errorMessage
@@ -50553,12 +50620,10 @@ const decimals = 9;
         };
         verifyResult = signClient.verifyMessage(verifyBody);
       } catch (error) {
-        verifyResult = {
-          message: "Verify failed.",
-          code: 20002
-        };
+        verifyResult = false;
+      } finally {
+        resolve(verifyResult);
       }
-      resolve(verifyResult);
     });
   },
   verifyFieldsMessage(_ref4) {
@@ -50583,12 +50648,10 @@ const decimals = 9;
         };
         verifyResult = signClient.verifyFields(verifyBody);
       } catch (error) {
-        verifyResult = {
-          message: "Verify failed.",
-          code: 20002
-        };
+        verifyResult = false;
+      } finally {
+        resolve(verifyResult);
       }
-      resolve(verifyResult);
     });
   },
   createNullifier(_ref5) {
@@ -50598,9 +50661,12 @@ const decimals = 9;
       privateKey,
       message
     } = _ref5;
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       if (!privateKey) {
-        reject("must have private key");
+        reject({
+          message: "must have private key"
+        });
+        return;
       }
       let createResult;
       try {
@@ -50612,7 +50678,7 @@ const decimals = 9;
         createResult = signClient.createNullifier(nextFields, privateKey);
         createResult.data = fields;
       } catch (err) {
-        let errorMessage = _utils__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"].getRealErrorMsg(err) || i18n.t("buildFailed");
+        let errorMessage = (await _utils__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"].getRealErrorMsg(err)) || i18n.t("buildFailed");
         createResult = {
           error: {
             message: errorMessage
@@ -50652,7 +50718,7 @@ function send(path, data) {
     console.log(path, data);
   }
 }
-send("log", "main js loaded");
+send("log", "bridge js loaded");
 global.send = send;
 global.account = _account__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"];
 global.utils = _utils__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"];
