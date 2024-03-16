@@ -4,7 +4,7 @@ const config = {
   entry: "./src/index.js", // Entry point of your application
   output: {
     path: path.resolve(__dirname, "dist"), // Output directory
-    filename: "main.js", // Output file
+    filename: "bridge.js", // Output file
   },
   module: {
     rules: [

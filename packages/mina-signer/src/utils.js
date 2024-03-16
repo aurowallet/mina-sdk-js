@@ -4,7 +4,7 @@
 import bs58check from "bs58check";
 
 export default {
-  isAddressValid({ address }) {
+  async isAddressValid({ address }) {
     try {
       if (!address.toLowerCase().startsWith("b62")) {
         return false;
@@ -15,7 +15,7 @@ export default {
       return false;
     }
   },
-  getRealErrorMsg(error) {
+  async getRealErrorMsg(error) {
     let errorMessage = "";
     try {
       if (error.message) {

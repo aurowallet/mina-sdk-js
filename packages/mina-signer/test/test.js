@@ -5,7 +5,7 @@ function expect(actual, matcher, title = "") {
 }
 
 /** account type */
-function runAccountTest() {
+async function runAccountTest() {
   const mne = account.generateMnemonic();
   console.log("mne", mne);
   expect(!!mne, true);
@@ -24,13 +24,15 @@ function runAccountTest() {
       };
       mneParams.accountIndex = j;
       console.log("mneParams", mneParams);
-      const accountWithoutPriKey = account.importWalletByMnemonic(mneParams);
+      const accountWithoutPriKey = await account.importWalletByMnemonic(
+        mneParams
+      );
       console.log("accountWithoutPriKey", accountWithoutPriKey);
       expect(accountWithoutPriKey.pubKey, innerAccount.pubKey);
       expect(accountWithoutPriKey.hdIndex, innerAccount.hdIndex);
 
       mneParams.needPrivateKey = true;
-      const accountWithPriKey = account.importWalletByMnemonic(mneParams);
+      const accountWithPriKey = await account.importWalletByMnemonic(mneParams);
       console.log("accountWithPriKey", accountWithPriKey);
 
       expect(accountWithPriKey.priKey, innerAccount.priKey);
@@ -39,7 +41,9 @@ function runAccountTest() {
       const privateKey = {
         privateKey: accountWithPriKey.priKey,
       };
-      const walletByPrivateKey = account.importWalletByPrivateKey(privateKey);
+      const walletByPrivateKey = await account.importWalletByPrivateKey(
+        privateKey
+      );
       console.log("walletByPrivateKey", walletByPrivateKey);
       expect(walletByPrivateKey.priKey, innerAccount.priKey);
       expect(walletByPrivateKey.pubKey, innerAccount.pubKey);
@@ -48,14 +52,14 @@ function runAccountTest() {
   }
 }
 
-function runUtilsTest() {
+async function runUtilsTest() {
   const testData = window.accountData;
   for (let index = 0; index < testData.length; index++) {
     const mneData = testData[index];
-    console.info(`utils current is ${index}, total is ${testData.length}`);
+    // console.info(`utils current is ${index}, total is ${testData.length}`);
     for (let j = 0; j < mneData.account.length; j++) {
       const innerAccount = mneData.account[j];
-      const status = utils.isAddressValid({
+      const status = await utils.isAddressValid({
         address: innerAccount.pubKey,
       });
       expect(status, true);
@@ -66,10 +70,10 @@ function runUtilsTest() {
 /**
  * test signPayment
  */
-function signPayment() {
+async function signPayment() {
   console.log("signPayment test start");
   const transactionData = window.transactionData.signPayment;
-  const signResultMainnet = auroSignLib.signTransaction(
+  const signResultMainnet = await auroSignLib.signTransaction(
     transactionData.mainnet.signParams
   );
   expect(
@@ -77,7 +81,7 @@ function signPayment() {
     JSON.stringify(transactionData.mainnet.signResult),
     "mainnet sendPayment"
   );
-  const signResultTest = auroSignLib.signTransaction(
+  const signResultTest = await auroSignLib.signTransaction(
     transactionData.testnet.signParams
   );
   expect(
@@ -87,10 +91,10 @@ function signPayment() {
   );
   console.log("signPayment test successful");
 }
-function signStakeTransaction() {
+async function signStakeTransaction() {
   console.log("signStakeTransaction test start");
   const transactionData = window.transactionData.signStakeTransaction;
-  const signResultMainnet = auroSignLib.signTransaction(
+  const signResultMainnet = await auroSignLib.signTransaction(
     transactionData.mainnet.signParams
   );
   expect(
@@ -99,7 +103,7 @@ function signStakeTransaction() {
     "mainnet signStakeTransaction"
   );
 
-  const signResultTest = auroSignLib.signTransaction(
+  const signResultTest = await auroSignLib.signTransaction(
     transactionData.testnet.signParams
   );
   expect(
@@ -109,16 +113,14 @@ function signStakeTransaction() {
   );
   console.log("signStakeTransaction test successful");
 }
-function signZkTransaction() {
+async function signZkTransaction() {
   console.log("signZkTransaction test start");
   const transactionData = window.transactionData.signZkTransaction;
   let params = {
     ...transactionData.testnet.signParams,
     transaction: transactionData.testnet.signParams.transaction,
   };
-  const signResultTest = auroSignLib.signTransaction(
-    params
-  );
+  const signResultTest = await auroSignLib.signTransaction(params);
   expect(
     JSON.stringify(signResultTest),
     JSON.stringify(transactionData.testnet.signResult),
@@ -126,10 +128,10 @@ function signZkTransaction() {
   );
   console.log("signZkTransaction test successful");
 }
-function signMessage() {
+async function signMessage() {
   console.log("signMessage test start");
   const transactionData = window.transactionData.signMessageTransaction;
-  const signResultMainnet = auroSignLib.signTransaction(
+  const signResultMainnet = await auroSignLib.signTransaction(
     transactionData.mainnet.signParams
   );
   expect(
@@ -137,14 +139,14 @@ function signMessage() {
     JSON.stringify(transactionData.mainnet.signResult),
     "mainnet signMessage"
   );
-  const verifyResultMain = auroSignLib.verifyMessage({
+  const verifyResultMain = await auroSignLib.verifyMessage({
     network: "mainnet",
     publicKey: transactionData.mainnet.signParams.publicKey,
     signature: transactionData.mainnet.signResult.signature,
     verifyMessage: transactionData.mainnet.signResult.data,
   });
   expect(verifyResultMain, true, "mainnet verifyMessage");
-  const signResultTest = auroSignLib.signTransaction(
+  const signResultTest = await auroSignLib.signTransaction(
     transactionData.testnet.signParams
   );
   expect(
@@ -153,7 +155,7 @@ function signMessage() {
     "testnet signMessage"
   );
 
-  const verifyResultTest = auroSignLib.verifyMessage({
+  const verifyResultTest = await auroSignLib.verifyMessage({
     network: "testnet",
     publicKey: transactionData.testnet.signParams.publicKey,
     signature: transactionData.testnet.signResult.signature,
@@ -164,17 +166,17 @@ function signMessage() {
 }
 
 /** test sign */
-function runTransactionTest() {
-  signPayment();
-  signStakeTransaction();
-  signZkTransaction()
-  signMessage();
+async function runTransactionTest() {
+  await signPayment();
+  await signStakeTransaction();
+  await signZkTransaction();
+  await signMessage();
 }
 
-function runFieldsTest() {
+async function runFieldsTest() {
   console.log("runFieldsTest test start");
   const transactionData = window.transactionData.signFiledsData;
-  const signResultMainnet = auroSignLib.signFields(
+  const signResultMainnet = await auroSignLib.signFields(
     transactionData.mainnet.signParams
   );
   expect(
@@ -182,14 +184,14 @@ function runFieldsTest() {
     transactionData.mainnet.signResult.signature,
     "mainnet fieldsTest"
   );
-  const verifyResultMain = auroSignLib.verifyFieldsMessage({
+  const verifyResultMain = await auroSignLib.verifyFieldsMessage({
     network: "mainnet",
     publicKey: transactionData.mainnet.signParams.publicKey,
     signature: transactionData.mainnet.signResult.signature,
     fields: transactionData.mainnet.signResult.data,
   });
   expect(verifyResultMain, true, "mainnet verifyMessage");
-  const signResultTest = auroSignLib.signFields(
+  const signResultTest = await auroSignLib.signFields(
     transactionData.testnet.signParams
   );
   expect(
@@ -198,7 +200,7 @@ function runFieldsTest() {
     "testnet fieldsTest"
   );
 
-  const verifyResultTest = auroSignLib.verifyFieldsMessage({
+  const verifyResultTest = await auroSignLib.verifyFieldsMessage({
     network: "testnet",
     publicKey: signResultTest.publicKey,
     signature: signResultTest.signature,
@@ -208,23 +210,23 @@ function runFieldsTest() {
   console.log("runFieldsTest test successful");
 }
 
-function runNullifierTest() {
+async function runNullifierTest() {
   console.log("runNullifierTest test start");
   const transactionData = window.transactionData.nullifierData;
-  const signResultMainnet = auroSignLib.createNullifier(
+  const signResultMainnet = await auroSignLib.createNullifier(
     transactionData.mainnet.signParams
   );
   expect(!!signResultMainnet.private, true, "mainnet runNullifierTest");
-  const signResultTest = auroSignLib.createNullifier(
+  const signResultTest = await auroSignLib.createNullifier(
     transactionData.testnet.signParams
   );
   expect(!!signResultTest.private, true, "testnet runNullifierTest");
   console.log("runNullifierTest test successful");
 }
 
-function runTests() {
+async function runTests() {
   /** test account  */
-  runAccountTest();
+  await runAccountTest();
 
   /** test utils */
   runUtilsTest();

@@ -16,7 +16,7 @@
     "bn.js": "^5.1.1",
     "bs58check": "^2.1.2",
     "libsodium-wrappers": "^0.7.9",
-    "mina-signer": "3.0.0",
+    "mina-signer": "3.0.4",
     "randombytes": "^2.1.0",
     "safe-buffer": "^5.2.1"
   },
