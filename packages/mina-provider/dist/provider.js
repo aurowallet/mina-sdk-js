@@ -9630,6 +9630,7 @@ var provider_MinaProvider = /** @class */ (function (_super) {
 
 
 
+
 /* harmony default export */ var dist = (provider);
 
 
@@ -9672,6 +9673,7 @@ contentScript.init();
 
 
 window.mina = new dist();
+window.getSiteIcon = getSiteIcon;
 
 /***/ })
 /******/ ]);
