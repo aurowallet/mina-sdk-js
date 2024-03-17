@@ -9643,29 +9643,27 @@ const contentScript = {
   init() {
     this.channel = new messageChannel("AuroApp");
     this.registerListeners();
-  },
-  replaceNonAlphaNumChars(str) {
-    return str.replace(/[^a-zA-Z0-9]/g, "_");
+    this.exposeMethods();
   },
   registerListeners() {
     this.channel.on("messageFromWeb", async data => {
-      var _data$payload;
-      let id = data === null || data === void 0 ? void 0 : (_data$payload = data.payload) === null || _data$payload === void 0 ? void 0 : _data$payload.id;
-      if (id) {
-        id = this.replaceNonAlphaNumChars(id);
-        const callbackName = `callback_${id}`;
-        window[callbackName] = data => {
-          if (data.id) {
-            this.channel.send("messageFromWallet", data);
-          }
-          delete window[callbackName];
-        };
-        AppProvider.postMessage(JSON.stringify({
-          ...data,
-          callback: `window.${callbackName}`
-        }));
+      try {
+        AppProvider.postMessage(JSON.stringify(data));
+      } catch (error) {
+        window.postMessage(JSON.stringify(data));
       }
     });
+  },
+  onAppResponse(data) {
+    if (data.id) {
+      this.channel.send("messageFromWallet", data);
+    } else {
+      // for event
+      this.channel.send(data === null || data === void 0 ? void 0 : data.action, data === null || data === void 0 ? void 0 : data.result);
+    }
+  },
+  exposeMethods() {
+    window.onAppResponse = this.onAppResponse.bind(this);
   }
 };
 contentScript.init();
