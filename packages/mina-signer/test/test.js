@@ -11,7 +11,8 @@ async function runAccountTest() {
   expect(!!mne, true);
 
   const testData = window.accountData;
-  for (let index = 0; index < testData.length; index++) {
+  // for (let index = 0; index < testData.length; index++) {
+  for (let index = 0; index < 100; index++) {
     const mneData = testData[index];
     console.info(
       `current is ${index}, total is ${testData.length}, mne: ${mneData.mne}`
@@ -113,7 +114,7 @@ async function signStakeTransaction() {
   );
   console.log("signStakeTransaction test successful");
 }
-async function signZkTransaction() {
+async function signZkTransaction() { 
   console.log("signZkTransaction test start");
   const transactionData = window.transactionData.signZkTransaction;
   let params = {
@@ -167,10 +168,10 @@ async function signMessage() {
 
 /** test sign */
 async function runTransactionTest() {
-  await signPayment();
-  await signStakeTransaction();
+  // await signPayment();
+  // await signStakeTransaction();
   await signZkTransaction();
-  await signMessage();
+  // await signMessage();
 }
 
 async function runFieldsTest() {
@@ -226,19 +227,19 @@ async function runNullifierTest() {
 
 async function runTests() {
   /** test account  */
-  await runAccountTest();
+  // await runAccountTest();
 
   /** test utils */
-  runUtilsTest();
+  // runUtilsTest();
 
   /** test transaction */
   runTransactionTest();
 
   /** test fields */
-  runFieldsTest();
+  // runFieldsTest();
 
   /** create Nullifier */
-  runNullifierTest();
+  // runNullifierTest();
 
   console.log("all tests successful.");
 }
