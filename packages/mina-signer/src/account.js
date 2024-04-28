@@ -52,10 +52,8 @@ export default {
   },
   importWalletByPrivateKey({ privateKey }) {
     return new Promise((resolve) => {
-      console.log("privateKey", privateKey);
       const client = new Client({ network: "mainnet" });
       const minaPublicKey = client.derivePublicKey(privateKey);
-      console.log("minaPublicKey", minaPublicKey);
       resolve({
         priKey: privateKey,
         pubKey: minaPublicKey,
