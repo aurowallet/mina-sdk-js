@@ -22,6 +22,6 @@ global.utils = utils;
 global.auroSignLib = auroSignLib;
 
 const minaSignerVersion = async () => {
-  return "3.0.6-1001";
+  return "3.0.7-1001";
 };
 global.minaSignerVersion = minaSignerVersion;

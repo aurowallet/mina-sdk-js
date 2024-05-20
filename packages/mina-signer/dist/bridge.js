@@ -8648,7 +8648,8 @@ let prefixes = {
   "signatureMainnet": "MinaSignatureMainnet",
   "signatureTestnet": "CodaSignature*******",
   "zkappUri": "MinaZkappUri********",
-  "deriveTokenId": "MinaDeriveTokenId***"
+  "deriveTokenId": "MinaDeriveTokenId***",
+  "sideLoadedVK": "MinaSideLoadedVk****"
 };
 let prefixHashes = {
   "CodaReceiptUC*******": ["2930292359494829300271368860633580634815819151887078160583250237349129726103", "15303314845540397914948764201521841781296890621466368017042313538410516382474", "8520568699315305732843613022173524514377597839978192694761879649747314556194"],
@@ -14434,7 +14435,7 @@ function rosettaCombineSignature(signature, signingPayload) {
 }
 // create a payload for /construction/combine
 function rosettaCombinePayload(unsignedPayload, privateKey, network) {
-  let signature = signTransaction(unsignedPayload.unsigned_transaction, privateKey, network);
+  let signature = signTransaction(JSON.parse(unsignedPayload.unsigned_transaction), privateKey, network);
   let signatures = [rosettaCombineSignature(signature, unsignedPayload.payloads[0])];
   return {
     network_identifier: {
@@ -15092,8 +15093,7 @@ class mina_signer_Client {
    * @returns A string with the resulting payload for /construction/combine.
    */
   rosettaCombinePayload(signingPayload, privateKey) {
-    let parsedPayload = JSON.parse(signingPayload);
-    return JSON.stringify(rosettaCombinePayload(parsedPayload, privateKey, this.network));
+    return rosettaCombinePayload(signingPayload, privateKey, this.network);
   }
   /**
    * Return the hex-encoded format of a valid public key. This will throw an exception if
@@ -51037,7 +51037,7 @@ global.account = _account__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"];
 global.utils = _utils__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"];
 global.auroSignLib = _lib__WEBPACK_IMPORTED_MODULE_3__[/* default */ "a"];
 const minaSignerVersion = async () => {
-  return "3.0.6-1001";
+  return "3.0.7-1001";
 };
 global.minaSignerVersion = minaSignerVersion;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(14)))

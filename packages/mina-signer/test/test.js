@@ -227,19 +227,19 @@ async function runNullifierTest() {
 
 async function runTests() {
   /** test account  */
-  // await runAccountTest();
+  await runAccountTest();
 
   /** test utils */
-  // runUtilsTest();
+  runUtilsTest();
 
   /** test transaction */
   runTransactionTest();
 
   /** test fields */
-  // runFieldsTest();
+  runFieldsTest();
 
   /** create Nullifier */
-  // runNullifierTest();
+  runNullifierTest();
 
   console.log("all tests successful.");
 }
