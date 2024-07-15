@@ -2,6 +2,7 @@ import "@babel/polyfill";
 import account from "./account";
 import utils from "./utils";
 import auroSignLib from "./lib";
+import webEncryption from "./encryption";
 
 // send message to JSChannel: MinaWallet
 function send(path, data) {
@@ -20,8 +21,9 @@ global.account = account;
 global.utils = utils;
 
 global.auroSignLib = auroSignLib;
+global.webEncryption = webEncryption;
 
 const minaSignerVersion = async () => {
-  return "3.0.7-1003";
+  return "3.0.7-1004";
 };
 global.minaSignerVersion = minaSignerVersion;
