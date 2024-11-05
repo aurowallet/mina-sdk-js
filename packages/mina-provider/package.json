@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@babel/polyfill": "7.12.1",
-    "@aurowallet/mina-provider": "1.0.5"
+    "@aurowallet/mina-provider": "1.0.6"
   },
   "devDependencies": {
     "@babel/core": "^7.8.3",
