@@ -24,6 +24,6 @@ global.auroSignLib = auroSignLib;
 global.webEncryption = webEncryption;
 
 const minaSignerVersion = async () => {
-  return "3.0.7-1005";
+  return "3.1.0-1006";
 };
 global.minaSignerVersion = minaSignerVersion;
