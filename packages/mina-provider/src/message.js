@@ -8,10 +8,14 @@ const contentScript = {
   },
   registerListeners() {
     this.channel.on("messageFromWeb", async (data) => {
-      try {
-        AppProvider.postMessage(JSON.stringify(data));
-      } catch (error) {
-        window.postMessage(JSON.stringify(data));
+      if (
+        typeof AppProvider !== "undefined" &&
+        AppProvider &&
+        typeof AppProvider.postMessage === "function"
+      ) {
+        try {
+          AppProvider.postMessage(JSON.stringify(data));
+        } catch (error) {}
       }
     });
   },

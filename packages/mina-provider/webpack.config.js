@@ -14,22 +14,14 @@ const config = {
         exclude: /node_modules\/(?!mina-signer)/, // Transpile mina-signer as well
         use: {
           loader: "babel-loader", // Uses babel-loader for transpiling ES6+ to ES5
-          options: {
-            presets: ["@babel/preset-env"], // Uses @babel/preset-env preset
-            plugins: ['@babel/plugin-proposal-optional-chaining'],
-          },
+          // presets/plugins are sourced from .babelrc so that
+          // `useBuiltIns: "usage"` + corejs polyfill injection actually applies.
         },
       },
     ],
   },
-  optimization: {
-    minimize: false, // Disables minimization for debugging purposes
-  },
   // The node configuration below might not be necessary unless you're dealing with specific node shims.
-  node: {
-    fs: "empty",
-    child_process: "empty",
-  },
+  node: false,
 };
 
 module.exports = config;
