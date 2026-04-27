@@ -1,21 +1,41 @@
-import * as bip32 from "bip32";
-import * as bip39 from "bip39";
+import { Buffer } from "buffer";
+import { HDKey } from "@scure/bip32";
+import * as bip39 from "@scure/bip39";
+import { wordlist } from "@scure/bip39/wordlists/english";
 import bs58check from "bs58check";
 import Client from "mina-signer";
-import { Buffer } from "safe-buffer";
 
 function reverse(bytes) {
-  const reversed = new Buffer(bytes.length);
+  const reversed = Buffer.alloc(bytes.length);
   for (let i = bytes.length; i > 0; i--) {
     reversed[bytes.length - i] = bytes[i - 1];
   }
   return reversed;
 }
 
+function getHDPath(accountIndex = 0) {
+  const purpose = 44;
+  const coinType = 12586;
+  const charge = 0;
+  const index = 0;
+  return (
+    "m/" +
+    purpose +
+    "'/" +
+    coinType +
+    "'/" +
+    accountIndex +
+    "'/" +
+    charge +
+    "/" +
+    index
+  );
+}
+
 export default {
   generateMnemonic() {
     return new Promise((resolve) => {
-      const mnemonic = bip39.generateMnemonic();
+      const mnemonic = bip39.generateMnemonic(wordlist, 128);
       resolve({
         mnemonic,
       });
@@ -29,11 +49,15 @@ export default {
     return new Promise((resolve) => {
       try {
         const seed = bip39.mnemonicToSeedSync(mnemonic);
-        const masterNode = bip32.fromSeed(seed);
-        let hdPath = "m/44'/12586'/" + accountIndex + "'/0/0";
-        const child0 = masterNode.derivePath(hdPath);
-        child0.privateKey[0] &= 0x3f;
-        const childPrivateKey = reverse(child0.privateKey);
+        const masterNode = HDKey.fromMasterSeed(seed);
+        const hdPath = getHDPath(accountIndex);
+        const child0 = masterNode.derive(hdPath);
+        if (!child0.privateKey) {
+          throw new Error("Failed to derive private key from mnemonic");
+        }
+        const child0PrivateKey = Buffer.from(child0.privateKey);
+        child0PrivateKey[0] &= 0x3f;
+        const childPrivateKey = reverse(child0PrivateKey);
         const minaPrivateKeyHex = `5a01${childPrivateKey.toString("hex")}`;
         const minaPrivateKey = bs58check.encode(
           Buffer.from(minaPrivateKeyHex, "hex")

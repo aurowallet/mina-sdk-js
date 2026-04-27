@@ -1,8 +1,12 @@
-import "@babel/polyfill";
+import "core-js/stable";
+import "regenerator-runtime/runtime";
+
 import account from "./account";
 import utils from "./utils";
 import auroSignLib from "./lib";
 import webEncryption from "./encryption";
+
+const root = typeof globalThis !== "undefined" ? globalThis : window;
 
 // send message to JSChannel: MinaWallet
 function send(path, data) {
@@ -15,15 +19,15 @@ function send(path, data) {
 }
 
 send("log", "bridge js loaded");
-global.send = send;
+root.send = send;
 
-global.account = account;
-global.utils = utils;
+root.account = account;
+root.utils = utils;
 
-global.auroSignLib = auroSignLib;
-global.webEncryption = webEncryption;
+root.auroSignLib = auroSignLib;
+root.webEncryption = webEncryption;
 
 const minaSignerVersion = async () => {
-  return "3.1.0-1006";
+  return "3.1.0-1007";
 };
-global.minaSignerVersion = minaSignerVersion;
+root.minaSignerVersion = minaSignerVersion;

@@ -5,6 +5,7 @@ import BigNumber from "bignumber.js";
 import Client from "mina-signer";
 import utils from "./utils";
 const decimals = 9;
+const fallbackErrorMessage = "buildFailed";
 export default {
   signTransaction({
     network = "mainnet", // | "testnet",
@@ -65,7 +66,7 @@ export default {
         signResult = signClient.signTransaction(signBody, privateKey);
       } catch (err) {
         let errorMessage =
-          (await utils.getRealErrorMsg(err)) || i18n.t("buildFailed");
+          (await utils.getRealErrorMsg(err)) || fallbackErrorMessage;
         signResult = { error: { message: errorMessage } };
       } finally {
         resolve(signResult);
@@ -91,7 +92,7 @@ export default {
         signResult.data = fields;
       } catch (err) {
         let errorMessage =
-          (await utils.getRealErrorMsg(err)) || i18n.t("buildFailed");
+          (await utils.getRealErrorMsg(err)) || fallbackErrorMessage;
         signResult = { error: { message: errorMessage } };
       }
       // return signResult;
@@ -168,7 +169,7 @@ export default {
         createResult.data = fields;
       } catch (err) {
         let errorMessage =
-          (await utils.getRealErrorMsg(err)) || i18n.t("buildFailed");
+          (await utils.getRealErrorMsg(err)) || fallbackErrorMessage;
         createResult = { error: { message: errorMessage } };
       }
       resolve(createResult);

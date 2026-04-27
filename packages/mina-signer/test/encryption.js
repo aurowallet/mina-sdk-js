@@ -1,5 +1,5 @@
 
-const react_private_keys = `
+const node_private_keys = `
 -----BEGIN PRIVATE KEY-----
 
 -----END PRIVATE KEY-----
@@ -25,12 +25,10 @@ async function testForeEncryptAndDecrypt() {
   });
   console.log("encrypted==0", encrypted);
 
-  const decryptedData = await webEncryption.decryptData(
-    encrypted.encryptedData,
-    encrypted.encryptedAESKey,
-    encrypted.iv,
-    node_private_keys
-  );
+  const decryptedData = await webEncryption.decryptData({
+    targetData: encrypted,
+    privateKey: node_private_keys,
+  });
   console.log("Decrypted data:", decryptedData);
 }
 

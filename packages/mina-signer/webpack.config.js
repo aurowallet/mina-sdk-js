@@ -1,4 +1,5 @@
 const path = require("path");
+const webpack = require("webpack");
 
 const config = {
   entry: "./src/index.js", // Entry point of your application
@@ -11,25 +12,34 @@ const config = {
       {
         test: /\.js$/, // Matches any JavaScript file
         // exclude: /node_modules/, // Excludes the node_modules directory
-        exclude: /node_modules\/(?!mina-signer)/, // Transpile mina-signer as well
+        exclude:
+          /node_modules\/(?!(mina-signer|@noble|@scure)\/)/, // Transpile mina-signer as well
         use: {
           loader: "babel-loader", // Uses babel-loader for transpiling ES6+ to ES5
           options: {
             presets: ["@babel/preset-env"], // Uses @babel/preset-env preset
-            plugins: ['@babel/plugin-proposal-optional-chaining'],
           },
         },
       },
     ],
   },
+  resolve: {
+    fallback: {
+      fs: false,
+      child_process: false,
+      buffer: require.resolve("buffer/"),
+    },
+  },
+  plugins: [
+    new webpack.ProvidePlugin({
+      Buffer: ["buffer", "Buffer"],
+    }),
+  ],
   optimization: {
     minimize: false, // Disables minimization for debugging purposes
   },
   // The node configuration below might not be necessary unless you're dealing with specific node shims.
-  node: {
-    fs: "empty",
-    child_process: "empty",
-  },
+  node: false,
 };
 
 module.exports = config;
