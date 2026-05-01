@@ -20,6 +20,7 @@ const contentScript = {
     });
   },
   onAppResponse(data) {
+    if (!data || typeof data !== "object") return;
     if (data.id) {
       this.channel.send("messageFromWallet", data);
     } else {
