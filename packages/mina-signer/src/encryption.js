@@ -17,22 +17,20 @@ export default {
     cipher.finish();
     return forge.util.encode64(cipher.output.getBytes());
   },
-  encryptData({ targetData, pubKey }) {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const aesKey = forge.random.getBytesSync(32); // 256-bit key
-        const iv = forge.random.getBytesSync(16); // 16-byte IV
-        const encryptedData = this.encryptDataWithAES(targetData, aesKey, iv);
-        const encryptedAESKey = this.encryptAESKeyWithRSA(aesKey, pubKey);
-        resolve({
-          encryptedData,
-          encryptedAESKey,
-          iv: forge.util.encode64(iv),
-        });
-      } catch (error) {
-        resolve({ error: String(error) });
-      }
-    });
+  async encryptData({ targetData, pubKey }) {
+    try {
+      const aesKey = forge.random.getBytesSync(32); // 256-bit key
+      const iv = forge.random.getBytesSync(16); // 16-byte IV
+      const encryptedData = this.encryptDataWithAES(targetData, aesKey, iv);
+      const encryptedAESKey = this.encryptAESKeyWithRSA(aesKey, pubKey);
+      return {
+        encryptedData,
+        encryptedAESKey,
+        iv: forge.util.encode64(iv),
+      };
+    } catch (error) {
+      return { error: { message: String(error) } };
+    }
   },
 
   decryptAESKeyWithRSA(encryptedAESKey, privateKeyPEM) {
@@ -50,24 +48,25 @@ export default {
     decipher.update(
       forge.util.createBuffer(forge.util.decode64(encryptedData))
     );
-    decipher.finish();
+    const success = decipher.finish();
+    if (!success) {
+      throw new Error("AES-CBC decryption failed: invalid padding");
+    }
     return JSON.parse(decipher.output.toString("utf8"));
   },
 
-  decryptData({ targetData, privateKey }) {
+  async decryptData({ targetData, privateKey }) {
     const { encryptedData, encryptedAESKey, iv } = targetData;
-    return new Promise(async (resolve, reject) => {
-      try {
-        const aesKey = this.decryptAESKeyWithRSA(encryptedAESKey, privateKey);
-        const data = this.decryptDataWithAES(
-          encryptedData,
-          aesKey,
-          forge.util.decode64(iv)
-        );
-        resolve(data);
-      } catch (error) {
-        resolve({ error: String(error) });
-      }
-    });
+    try {
+      const aesKey = this.decryptAESKeyWithRSA(encryptedAESKey, privateKey);
+      const data = this.decryptDataWithAES(
+        encryptedData,
+        aesKey,
+        forge.util.decode64(iv)
+      );
+      return data;
+    } catch (error) {
+      return { error: { message: String(error) } };
+    }
   },
 };

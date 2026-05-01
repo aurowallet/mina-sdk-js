@@ -36,7 +36,12 @@ const config = {
     }),
   ],
   optimization: {
-    minimize: false, // Disables minimization for debugging purposes
+    minimize: true,
+    minimizer: [
+      new (require("terser-webpack-plugin"))({
+        extractComments: false,
+      }),
+    ],
   },
   // The node configuration below might not be necessary unless you're dealing with specific node shims.
   node: false,

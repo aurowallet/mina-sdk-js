@@ -47,17 +47,22 @@ export default {
     needPrivateKey = false,
   }) {
     return new Promise((resolve) => {
+      let seed, child0PrivateKey, childPrivateKey;
       try {
-        const seed = bip39.mnemonicToSeedSync(mnemonic);
+        if (!bip39.validateMnemonic(mnemonic, wordlist)) {
+          resolve({ error: { message: "Invalid mnemonic" } });
+          return;
+        }
+        seed = bip39.mnemonicToSeedSync(mnemonic);
         const masterNode = HDKey.fromMasterSeed(seed);
         const hdPath = getHDPath(accountIndex);
         const child0 = masterNode.derive(hdPath);
         if (!child0.privateKey) {
           throw new Error("Failed to derive private key from mnemonic");
         }
-        const child0PrivateKey = Buffer.from(child0.privateKey);
+        child0PrivateKey = Buffer.from(child0.privateKey);
         child0PrivateKey[0] &= 0x3f;
-        const childPrivateKey = reverse(child0PrivateKey);
+        childPrivateKey = reverse(child0PrivateKey);
         const minaPrivateKeyHex = `5a01${childPrivateKey.toString("hex")}`;
         const minaPrivateKey = bs58check.encode(
           Buffer.from(minaPrivateKeyHex, "hex")
@@ -75,6 +80,10 @@ export default {
         resolve(res);
       } catch (error) {
         resolve({ error: { message: String(error) } });
+      } finally {
+        if (seed) seed.fill(0);
+        if (child0PrivateKey) child0PrivateKey.fill(0);
+        if (childPrivateKey) childPrivateKey.fill(0);
       }
     });
   },
@@ -99,7 +108,7 @@ export default {
           privateKey: mnemonicOrPrivateKey,
         });
       case "mnemonic":
-      default:
+        default:
         return await this.importWalletByMnemonic({
           mnemonic: mnemonicOrPrivateKey,
         });

@@ -6,7 +6,7 @@ import bs58check from "bs58check";
 export default {
   async isAddressValid({ address }) {
     try {
-      if (!address.toLowerCase().startsWith("b62")) {
+      if (!address.startsWith("B62")) {
         return false;
       }
       const decodedAddress = bs58check.decode(address).toString("hex");
@@ -26,7 +26,7 @@ export default {
         errorMessage = error[0].message;
         // buildError
         if (!errorMessage && error.length > 1) {
-          errorMessage = error[1].c;
+          errorMessage = error[1]?.c || error[1]?.message || String(error[1]);
         }
       }
       if (typeof error === "string") {
@@ -37,7 +37,9 @@ export default {
           errorMessage = error;
         }
       }
-    } catch (error) {}
+    } catch (parseError) {
+      console.warn("getRealErrorMsg: failed to parse error", parseError);
+    }
     return errorMessage;
   },
 };

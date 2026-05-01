@@ -168,10 +168,10 @@ async function signMessage() {
 
 /** test sign */
 async function runTransactionTest() {
-  // await signPayment();
-  // await signStakeTransaction();
+  await signPayment();
+  await signStakeTransaction();
   await signZkTransaction();
-  // await signMessage();
+  await signMessage();
 }
 
 async function runFieldsTest() {
@@ -230,16 +230,16 @@ async function runTests() {
   await runAccountTest();
 
   /** test utils */
-  runUtilsTest();
+  await runUtilsTest();
 
   /** test transaction */
-  runTransactionTest();
+  await runTransactionTest();
 
   /** test fields */
-  runFieldsTest();
+  await runFieldsTest();
 
   /** create Nullifier */
-  runNullifierTest();
+  await runNullifierTest();
 
   console.log("all tests successful.");
 }

@@ -12,7 +12,11 @@ const root = typeof globalThis !== "undefined" ? globalThis : window;
 function send(path, data) {
   //  sendMessage('MinaWallet', JSON.stringify({ path, data }))
   if (window.location.href === "about:blank") {
-    MinaWallet.postMessage(JSON.stringify({ path, data }));
+    try {
+      MinaWallet.postMessage(JSON.stringify({ path, data }));
+    } catch (e) {
+      console.warn("send failed:", e);
+    }
   } else {
     console.log(path, data);
   }
@@ -28,6 +32,6 @@ root.auroSignLib = auroSignLib;
 root.webEncryption = webEncryption;
 
 const minaSignerVersion = async () => {
-  return "3.1.0-1007";
+  return "3.1.0-1008";
 };
 root.minaSignerVersion = minaSignerVersion;

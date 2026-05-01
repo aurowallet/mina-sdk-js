@@ -7,7 +7,7 @@ import utils from "./utils";
 const decimals = 9;
 const fallbackErrorMessage = "buildFailed";
 export default {
-  signTransaction({
+  async signTransaction({
     network = "mainnet", // | "testnet",
     type = "payment", // | "delegation" | "zk" | "message",
     privateKey,
@@ -22,82 +22,71 @@ export default {
     transaction,
     message,
   }) {
-    return new Promise(async (resolve, reject) => {
-      if (!privateKey) {
-        reject({ message: "must have private key" });
-        return;
-      }
+    if (!privateKey) {
+      return { error: { message: "must have private key" } };
+    }
+    try {
       const signClient = new Client({ network: network });
-      let signResult;
-      try {
-        let signBody = {};
-        if (type === "message") {
-          signBody = message;
-        } else if (type === "zk") {
-          let decimal = new BigNumber(10).pow(decimals);
-          let sendFee = new BigNumber(fee).multipliedBy(decimal).toNumber();
+      let signBody = {};
+      if (type === "message") {
+        signBody = message;
+      } else if (type === "zk") {
+        let decimal = new BigNumber(10).pow(decimals);
+        let sendFee = new BigNumber(fee).multipliedBy(decimal).toFixed(0);
 
-          signBody = {
-            zkappCommand: JSON.parse(transaction),
-            feePayer: {
-              feePayer: fromAddress,
-              fee: sendFee,
-              nonce: nonce,
-              memo: memo || "",
-            },
-          };
-        } else {
-          let decimal = new BigNumber(10).pow(decimals);
-          let sendFee = new BigNumber(fee).multipliedBy(decimal).toNumber();
-          signBody = {
-            to: toAddress,
-            from: fromAddress,
+        signBody = {
+          zkappCommand: JSON.parse(transaction),
+          feePayer: {
+            feePayer: fromAddress,
             fee: sendFee,
             nonce: nonce,
             memo: memo || "",
-          };
-          if (type === "payment") {
-            let sendAmount = new BigNumber(amount)
-              .multipliedBy(decimal)
-              .toNumber();
-            signBody.amount = sendAmount;
-          }
+          },
+        };
+      } else {
+        let decimal = new BigNumber(10).pow(decimals);
+        let sendFee = new BigNumber(fee).multipliedBy(decimal).toFixed(0);
+        signBody = {
+          to: toAddress,
+          from: fromAddress,
+          fee: sendFee,
+          nonce: nonce,
+          memo: memo || "",
+        };
+        if (type === "payment") {
+          let sendAmount = new BigNumber(amount)
+            .multipliedBy(decimal)
+            .toFixed(0);
+          signBody.amount = sendAmount;
         }
-        signResult = signClient.signTransaction(signBody, privateKey);
-      } catch (err) {
-        let errorMessage =
-          (await utils.getRealErrorMsg(err)) || fallbackErrorMessage;
-        signResult = { error: { message: errorMessage } };
-      } finally {
-        resolve(signResult);
       }
-    });
+      return signClient.signTransaction(signBody, privateKey);
+    } catch (err) {
+      let errorMessage =
+        (await utils.getRealErrorMsg(err)) || fallbackErrorMessage;
+      return { error: { message: errorMessage } };
+    }
   },
-  signFields({
+  async signFields({
     network = "mainnet", //| "testnet",
     privateKey,
     message,
   }) {
-    return new Promise(async (resolve, reject) => {
-      if (!privateKey) {
-        reject({ message: "must have private key" });
-        return;
-      }
-      let signResult;
-      try {
-        let fields = message;
-        const nextFields = fields.map(BigInt);
-        const signClient = new Client({ network: network });
-        signResult = signClient.signFields(nextFields, privateKey);
-        signResult.data = fields;
-      } catch (err) {
-        let errorMessage =
-          (await utils.getRealErrorMsg(err)) || fallbackErrorMessage;
-        signResult = { error: { message: errorMessage } };
-      }
-      // return signResult;
-      resolve(signResult);
-    });
+    if (!privateKey) {
+      return { error: { message: "must have private key" } };
+    }
+    try {
+      let fields = message;
+      const nextFields = fields.map(BigInt);
+      const signClient = new Client({ network: network });
+      let signResult = signClient.signFields(nextFields, privateKey);
+      signResult.data = fields;
+      return signResult;
+    } catch (err) {
+      let errorMessage =
+        (await utils.getRealErrorMsg(err)) || fallbackErrorMessage;
+      return { error: { message: errorMessage } };
+    }
   },
   verifyMessage({
     network = "mainnet", // | "testnet",
@@ -150,29 +139,25 @@ export default {
       }
     });
   },
-  createNullifier({
+  async createNullifier({
     network = "mainnet", //| "testnet",
     privateKey,
     message,
   }) {
-    return new Promise(async (resolve, reject) => {
-      if (!privateKey) {
-        reject({ message: "must have private key" });
-        return;
-      }
-      let createResult;
-      try {
-        let fields = message;
-        const nextFields = fields.map(BigInt);
-        const signClient = new Client({ network: network });
-        createResult = signClient.createNullifier(nextFields, privateKey);
-        createResult.data = fields;
-      } catch (err) {
-        let errorMessage =
-          (await utils.getRealErrorMsg(err)) || fallbackErrorMessage;
-        createResult = { error: { message: errorMessage } };
-      }
-      resolve(createResult);
-    });
+    if (!privateKey) {
+      return { error: { message: "must have private key" } };
+    }
+    try {
+      let fields = message;
+      const nextFields = fields.map(BigInt);
+      const signClient = new Client({ network: network });
+      let createResult = signClient.createNullifier(nextFields, privateKey);
+      createResult.data = fields;
+      return createResult;
+    } catch (err) {
+      let errorMessage =
+        (await utils.getRealErrorMsg(err)) || fallbackErrorMessage;
+      return { error: { message: errorMessage } };
+    }
   },
 };
