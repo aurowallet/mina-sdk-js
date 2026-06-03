@@ -6,9 +6,37 @@ import Client from "mina-signer";
 import utils from "./utils";
 const decimals = 9;
 const fallbackErrorMessage = "buildFailed";
+
+const networkIDMap = {
+  mainnet: "mina:mainnet",
+  testnet: "mina:devnet",
+  zekomainnet: "zeko:mainnet",
+  zekotestnet: "zeko:testnet",
+};
+
+function getSignClient(networkID = "mainnet") {
+  if (networkID && typeof networkID === "object") {
+    return new Client({ network: networkID });
+  }
+
+  let clientNetwork;
+  if (networkID === "mainnet" || networkID === networkIDMap.mainnet) {
+    clientNetwork = "mainnet";
+  } else if (
+    networkID === "zeko-mainnet" ||
+    networkID === networkIDMap.zekomainnet
+  ) {
+    clientNetwork = { custom: "zeko-mainnet" };
+  } else {
+    clientNetwork = "testnet";
+  }
+
+  return new Client({ network: clientNetwork });
+}
+
 export default {
   async signTransaction({
-    network = "mainnet", // | "testnet",
+    network = "mainnet", // | "testnet" | "zeko-mainnet" | NetworkID
     type = "payment", // | "delegation" | "zk" | "message",
     privateKey,
 
@@ -26,7 +54,7 @@ export default {
       return { error: { message: "must have private key" } };
     }
     try {
-      const signClient = new Client({ network: network });
+      const signClient = getSignClient(network);
       let signBody = {};
       if (type === "message") {
         signBody = message;
@@ -68,7 +96,7 @@ export default {
     }
   },
   async signFields({
-    network = "mainnet", //| "testnet",
+    network = "mainnet", //| "testnet" | "zeko-mainnet" | NetworkID
     privateKey,
     message,
   }) {
@@ -78,7 +106,7 @@ export default {
     try {
       let fields = message;
       const nextFields = fields.map(BigInt);
-      const signClient = new Client({ network: network });
+      const signClient = getSignClient(network);
       let signResult = signClient.signFields(nextFields, privateKey);
       signResult.data = fields;
       return signResult;
@@ -89,7 +117,7 @@ export default {
     }
   },
   verifyMessage({
-    network = "mainnet", // | "testnet",
+    network = "mainnet", // | "testnet" | "zeko-mainnet" | NetworkID
     publicKey,
     signature,
     verifyMessage,
@@ -99,7 +127,7 @@ export default {
       try {
         const nextSignature =
           typeof signature === "string" ? JSON.parse(signature) : signature;
-        const signClient = new Client({ network: network });
+        const signClient = getSignClient(network);
         const verifyBody = {
           data: verifyMessage,
           publicKey: publicKey,
@@ -115,7 +143,7 @@ export default {
   },
 
   verifyFieldsMessage({
-    network = "mainnet", //| "testnet",
+    network = "mainnet", //| "testnet" | "zeko-mainnet" | NetworkID
     publicKey,
     signature,
     fields,
@@ -123,7 +151,7 @@ export default {
     return new Promise((resolve) => {
       let verifyResult;
       try {
-        const signClient = new Client({ network: network });
+        const signClient = getSignClient(network);
 
         const nextFields = fields.map(BigInt);
         const verifyBody = {
@@ -140,7 +168,7 @@ export default {
     });
   },
   async createNullifier({
-    network = "mainnet", //| "testnet",
+    network = "mainnet", //| "testnet" | "zeko-mainnet" | NetworkID
     privateKey,
     message,
   }) {
@@ -150,7 +178,7 @@ export default {
     try {
       let fields = message;
       const nextFields = fields.map(BigInt);
-      const signClient = new Client({ network: network });
+      const signClient = getSignClient(network);
       let createResult = signClient.createNullifier(nextFields, privateKey);
       createResult.data = fields;
       return createResult;
