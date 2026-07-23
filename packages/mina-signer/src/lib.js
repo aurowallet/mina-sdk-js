@@ -4,8 +4,14 @@
 import BigNumber from "bignumber.js";
 import Client from "mina-signer";
 import utils from "./utils";
+import {
+  getZkappCommandEra,
+  hasUnsupportedZkappStateLength,
+} from "./zkAppSigner";
 const decimals = 9;
 const fallbackErrorMessage = "buildFailed";
+const zkEmptyPublicKey =
+  "B62qiTKpEPjGTSHZrtM8uXiKgn8So916pLmNJKDhKeyBQL9TDb3nvBG";
 
 const networkIDMap = {
   mainnet: "mina:mainnet",
@@ -14,9 +20,9 @@ const networkIDMap = {
   zekotestnet: "zeko:testnet",
 };
 
-function getSignClient(networkID = "mainnet") {
+function getSignClient(networkID = "mainnet", options = {}) {
   if (networkID && typeof networkID === "object") {
-    return new Client({ network: networkID });
+    return new Client({ network: networkID, ...options });
   }
 
   let clientNetwork;
@@ -31,7 +37,11 @@ function getSignClient(networkID = "mainnet") {
     clientNetwork = "testnet";
   }
 
-  return new Client({ network: clientNetwork });
+  return new Client({ network: clientNetwork, ...options });
+}
+
+function getZkappFeePayerAddress(zkappCommand) {
+  return zkappCommand?.feePayer?.body?.publicKey || "";
 }
 
 export default {
@@ -54,23 +64,52 @@ export default {
       return { error: { message: "must have private key" } };
     }
     try {
-      const signClient = getSignClient(network);
+      let signClient = getSignClient(network);
       let signBody = {};
       if (type === "message") {
         signBody = message;
       } else if (type === "zk") {
-        let decimal = new BigNumber(10).pow(decimals);
-        let sendFee = new BigNumber(fee).multipliedBy(decimal).toFixed(0);
+        const zkappCommand =
+          typeof transaction === "string" ? JSON.parse(transaction) : transaction;
+        if (hasUnsupportedZkappStateLength(zkappCommand)) {
+          return { error: { message: "unsupported zkapp state length" } };
+        }
+        signClient = getSignClient(network, {
+          era: getZkappCommandEra(zkappCommand),
+        });
+        const txFeePayerAddress = getZkappFeePayerAddress(zkappCommand);
+        if (
+          txFeePayerAddress &&
+          txFeePayerAddress !== zkEmptyPublicKey &&
+          txFeePayerAddress !== fromAddress
+        ) {
+          let decodedMemo = "";
+          try {
+            decodedMemo = utils.decodeMemo(zkappCommand.memo) || "";
+          } catch {}
+          signBody = {
+            zkappCommand,
+            feePayer: {
+              feePayer: zkappCommand.feePayer.body.publicKey,
+              fee: zkappCommand.feePayer.body.fee,
+              nonce: zkappCommand.feePayer.body.nonce,
+              memo: decodedMemo,
+            },
+          };
+        } else {
+          let decimal = new BigNumber(10).pow(decimals);
+          let sendFee = new BigNumber(fee).multipliedBy(decimal).toFixed(0);
 
-        signBody = {
-          zkappCommand: JSON.parse(transaction),
-          feePayer: {
-            feePayer: fromAddress,
-            fee: sendFee,
-            nonce: nonce,
-            memo: memo || "",
-          },
-        };
+          signBody = {
+            zkappCommand,
+            feePayer: {
+              feePayer: fromAddress,
+              fee: sendFee,
+              nonce: nonce,
+              memo: memo || "",
+            },
+          };
+        }
       } else {
         let decimal = new BigNumber(10).pow(decimals);
         let sendFee = new BigNumber(fee).multipliedBy(decimal).toFixed(0);

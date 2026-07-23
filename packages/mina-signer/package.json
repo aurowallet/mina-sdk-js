@@ -1,6 +1,6 @@
 {
   "name": "mina-signer",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -14,7 +14,7 @@
     "bignumber.js": "^9.0.1",
     "bs58check": "^4.0.0",
     "core-js": "^3.46.0",
-    "mina-signer": "3.1.0",
+    "mina-signer": "4.1.0",
     "node-forge": "^1.4.0",
     "regenerator-runtime": "^0.14.1",
     "buffer": "^6.0.3"

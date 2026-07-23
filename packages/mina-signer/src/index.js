@@ -5,6 +5,7 @@ import account from "./account";
 import utils from "./utils";
 import auroSignLib from "./lib";
 import webEncryption from "./encryption";
+import zkAppSigner from "./zkAppSigner";
 
 const root = typeof globalThis !== "undefined" ? globalThis : window;
 
@@ -30,8 +31,9 @@ root.utils = utils;
 
 root.auroSignLib = auroSignLib;
 root.webEncryption = webEncryption;
+root.zkAppSigner = zkAppSigner;
 
 const minaSignerVersion = async () => {
-  return "3.1.0-1008";
+  return "4.1.0-1001";
 };
 root.minaSignerVersion = minaSignerVersion;

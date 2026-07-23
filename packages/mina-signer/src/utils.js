@@ -4,6 +4,15 @@
 import bs58check from "bs58check";
 
 export default {
+  decodeMemo(encode) {
+    try {
+      const encoded = bs58check.decode(encode);
+      const memoBytes = encoded.slice(3, 3 + (encoded[2] || 0));
+      return new TextDecoder("utf-8").decode(memoBytes);
+    } catch {
+      return encode;
+    }
+  },
   async isAddressValid({ address }) {
     try {
       if (!address.startsWith("B62")) {

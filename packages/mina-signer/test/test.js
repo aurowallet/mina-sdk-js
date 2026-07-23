@@ -225,6 +225,108 @@ async function runNullifierTest() {
   console.log("runNullifierTest test successful");
 }
 
+async function runZkAppSignerTest() {
+  console.log("runZkAppSignerTest test start");
+  const transactionData = window.transactionData.signZkTransaction.testnet;
+  const buildCommand = (lengths) => ({
+    accountUpdates: lengths.map((length) => ({
+      body: {
+        update: {
+          appState: Array(length).fill("0"),
+        },
+        preconditions: {
+          account: {
+            state: Array(length).fill("0"),
+          },
+        },
+      },
+    })),
+  });
+
+  const berkeleyCommand = buildCommand([8]);
+  expect(
+    JSON.stringify(zkAppSigner.getAccountUpdateStateLengths(berkeleyCommand)),
+    JSON.stringify([8, 8]),
+    "berkeley state lengths"
+  );
+  expect(
+    zkAppSigner.getZkappCommandEra(berkeleyCommand),
+    "berkeley",
+    "berkeley era"
+  );
+  expect(
+    zkAppSigner.hasUnsupportedZkappStateLength(berkeleyCommand),
+    false,
+    "berkeley unsupported"
+  );
+
+  const mesaCommand = buildCommand([32]);
+  expect(
+    zkAppSigner.getZkappCommandEra(mesaCommand),
+    undefined,
+    "mesa era"
+  );
+  expect(
+    zkAppSigner.hasUnsupportedZkappStateLength(mesaCommand),
+    false,
+    "mesa unsupported"
+  );
+
+  expect(
+    zkAppSigner.hasUnsupportedZkappStateLength(buildCommand([8, 32])),
+    true,
+    "mixed unsupported"
+  );
+  expect(
+    zkAppSigner.hasUnsupportedZkappStateLength(buildCommand([16])),
+    true,
+    "unknown unsupported"
+  );
+
+  const unsupportedSignResult = await auroSignLib.signTransaction({
+    network: "testnet",
+    type: "zk",
+    privateKey: "EKEfKdYoaCeGy4aZoCSam6DdGejrL121HSwFGrckzkLcLqPTMUxW",
+    fromAddress: "B62qkVs6zgN84e1KjFxurigqTQ57FqV3KnWubV3t77E9R6uBm4DmkPi",
+    fee: "0.2",
+    nonce: "1",
+    transaction: JSON.stringify(buildCommand([8, 32])),
+  });
+  expect(
+    unsupportedSignResult.error.message,
+    "unsupported zkapp state length",
+    "unsupported signTransaction"
+  );
+
+  const delegatedFeePayerCommand = JSON.parse(
+    transactionData.signParams.transaction
+  );
+  delegatedFeePayerCommand.feePayer.body.publicKey =
+    "B62qk3FF1FxfFxfJ4CLSgu2YehPdRqcNZw7Jw3z1JMyH28cSNR6XYDW";
+  delegatedFeePayerCommand.feePayer.body.fee = "300000000";
+  delegatedFeePayerCommand.feePayer.body.nonce = "2";
+  const delegatedFeePayerResult = await auroSignLib.signTransaction({
+    ...transactionData.signParams,
+    transaction: JSON.stringify(delegatedFeePayerCommand),
+  });
+  expect(
+    delegatedFeePayerResult.data.feePayer.feePayer,
+    delegatedFeePayerCommand.feePayer.body.publicKey,
+    "transaction feePayer publicKey"
+  );
+  expect(
+    delegatedFeePayerResult.data.feePayer.fee,
+    delegatedFeePayerCommand.feePayer.body.fee,
+    "transaction feePayer fee"
+  );
+  expect(
+    delegatedFeePayerResult.data.feePayer.nonce,
+    delegatedFeePayerCommand.feePayer.body.nonce,
+    "transaction feePayer nonce"
+  );
+  console.log("runZkAppSignerTest test successful");
+}
+
 async function runTests() {
   /** test account  */
   await runAccountTest();
@@ -240,6 +342,9 @@ async function runTests() {
 
   /** create Nullifier */
   await runNullifierTest();
+
+  /** zkApp signer era detection */
+  await runZkAppSignerTest();
 
   console.log("all tests successful.");
 }
