@@ -1,3 +1,5 @@
+import getSignClient from "./signClient";
+
 function getAccountUpdateBody(accountUpdate) {
   if (!accountUpdate || typeof accountUpdate !== "object") return null;
   const body = accountUpdate.body;
@@ -65,8 +67,30 @@ export function hasUnsupportedZkappStateLength(zkappCommand) {
   return hasUnknownState || (hasBerkeleyState && hasMesaState);
 }
 
+export function getZkappCommandCommitments({
+  network = "mainnet",
+  zkappCommand,
+  feePayer,
+}) {
+  if (hasUnsupportedZkappStateLength(zkappCommand)) {
+    throw new Error("unsupported zkapp state length");
+  }
+  const client = getSignClient(network, {
+    era: getZkappCommandEra(zkappCommand),
+  });
+  const result = client.getZkappCommandCommitments({
+    zkappCommand,
+    feePayer,
+  });
+  return {
+    commitment: result.commitment.toString(),
+    fullCommitment: result.fullCommitment.toString(),
+  };
+}
+
 export default {
   getAccountUpdateStateLengths,
   getZkappCommandEra,
   hasUnsupportedZkappStateLength,
+  getZkappCommandCommitments,
 };

@@ -34,6 +34,6 @@ root.webEncryption = webEncryption;
 root.zkAppSigner = zkAppSigner;
 
 const minaSignerVersion = async () => {
-  return "4.1.0-1001";
+  return "4.1.0-1002";
 };
 root.minaSignerVersion = minaSignerVersion;

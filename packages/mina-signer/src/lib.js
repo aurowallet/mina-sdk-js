@@ -2,8 +2,8 @@
  * sign & verify
  */
 import BigNumber from "bignumber.js";
-import Client from "mina-signer";
 import utils from "./utils";
+import getSignClient from "./signClient";
 import {
   getZkappCommandEra,
   hasUnsupportedZkappStateLength,
@@ -13,35 +13,15 @@ const fallbackErrorMessage = "buildFailed";
 const zkEmptyPublicKey =
   "B62qiTKpEPjGTSHZrtM8uXiKgn8So916pLmNJKDhKeyBQL9TDb3nvBG";
 
-const networkIDMap = {
-  mainnet: "mina:mainnet",
-  testnet: "mina:devnet",
-  zekomainnet: "zeko:mainnet",
-  zekotestnet: "zeko:testnet",
-};
-
-function getSignClient(networkID = "mainnet", options = {}) {
-  if (networkID && typeof networkID === "object") {
-    return new Client({ network: networkID, ...options });
-  }
-
-  let clientNetwork;
-  if (networkID === "mainnet" || networkID === networkIDMap.mainnet) {
-    clientNetwork = "mainnet";
-  } else if (
-    networkID === "zeko-mainnet" ||
-    networkID === networkIDMap.zekomainnet
-  ) {
-    clientNetwork = { custom: "zeko-mainnet" };
-  } else {
-    clientNetwork = "testnet";
-  }
-
-  return new Client({ network: clientNetwork, ...options });
-}
-
 function getZkappFeePayerAddress(zkappCommand) {
   return zkappCommand?.feePayer?.body?.publicKey || "";
+}
+
+function getZkappValidUntil(zkappCommand) {
+  const validUntil = zkappCommand?.feePayer?.body?.validUntil;
+  return validUntil === undefined || validUntil === null
+    ? null
+    : String(validUntil);
 }
 
 export default {
@@ -64,9 +44,10 @@ export default {
       return { error: { message: "must have private key" } };
     }
     try {
-      let signClient = getSignClient(network);
+      let signClient;
       let signBody = {};
       if (type === "message") {
+        signClient = getSignClient(network);
         signBody = message;
       } else if (type === "zk") {
         const zkappCommand =
@@ -94,6 +75,7 @@ export default {
               fee: zkappCommand.feePayer.body.fee,
               nonce: zkappCommand.feePayer.body.nonce,
               memo: decodedMemo,
+              validUntil: getZkappValidUntil(zkappCommand),
             },
           };
         } else {
@@ -107,10 +89,12 @@ export default {
               fee: sendFee,
               nonce: nonce,
               memo: memo || "",
+              validUntil: getZkappValidUntil(zkappCommand),
             },
           };
         }
       } else {
+        signClient = getSignClient(network);
         let decimal = new BigNumber(10).pow(decimals);
         let sendFee = new BigNumber(fee).multipliedBy(decimal).toFixed(0);
         signBody = {

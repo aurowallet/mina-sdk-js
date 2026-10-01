@@ -283,6 +283,28 @@ async function runZkAppSignerTest() {
     "unknown unsupported"
   );
 
+  const commitmentResult = zkAppSigner.getZkappCommandCommitments({
+    network: "testnet",
+    zkappCommand: JSON.parse(transactionData.signParams.transaction),
+    feePayer: {
+      feePayer: transactionData.signParams.fromAddress,
+      fee: "200000000",
+      nonce: "1",
+      memo: "",
+      validUntil: "123",
+    },
+  });
+  expect(
+    typeof commitmentResult.commitment,
+    "string",
+    "commitment helper result"
+  );
+  expect(
+    typeof commitmentResult.fullCommitment,
+    "string",
+    "full commitment helper result"
+  );
+
   const unsupportedSignResult = await auroSignLib.signTransaction({
     network: "testnet",
     type: "zk",
@@ -323,6 +345,11 @@ async function runZkAppSignerTest() {
     delegatedFeePayerResult.data.feePayer.nonce,
     delegatedFeePayerCommand.feePayer.body.nonce,
     "transaction feePayer nonce"
+  );
+  expect(
+    delegatedFeePayerResult.data.feePayer.validUntil,
+    delegatedFeePayerCommand.feePayer.body.validUntil,
+    "transaction feePayer validUntil"
   );
   console.log("runZkAppSignerTest test successful");
 }
